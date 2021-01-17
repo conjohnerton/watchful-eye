@@ -32,15 +32,15 @@
       "type": "function"
     }
   ],
-  "metadata": "{\"compiler\":{\"version\":\"0.5.16+commit.9c3226ce\"},\"language\":\"Solidity\",\"output\":{\"abi\":[{\"constant\":true,\"inputs\":[],\"name\":\"get\",\"outputs\":[{\"internalType\":\"uint256\",\"name\":\"\",\"type\":\"uint256\"}],\"payable\":false,\"stateMutability\":\"view\",\"type\":\"function\"},{\"constant\":false,\"inputs\":[{\"internalType\":\"uint256\",\"name\":\"x\",\"type\":\"uint256\"}],\"name\":\"set\",\"outputs\":[],\"payable\":false,\"stateMutability\":\"nonpayable\",\"type\":\"function\"}],\"devdoc\":{\"methods\":{}},\"userdoc\":{\"methods\":{}}},\"settings\":{\"compilationTarget\":{\"/home/conjohn/code/arbie/contracts/SimpleStorage.sol\":\"SimpleStorage\"},\"evmVersion\":\"istanbul\",\"libraries\":{},\"optimizer\":{\"enabled\":false,\"runs\":200},\"remappings\":[]},\"sources\":{\"/home/conjohn/code/arbie/contracts/SimpleStorage.sol\":{\"keccak256\":\"0xe321ad8773062bf6b48111adf02420d589300244e9af801838545a5de0748fbc\",\"urls\":[\"bzz-raw://0e32d9b206deb439ffc585d966b7f929b923fda54c67fe35109dde09bdd18be8\",\"dweb:/ipfs/QmPZLPbsCxQTWQjDDTkYfzUpPanUPWxwCVt6E582i1PRYE\"]}},\"version\":1}",
-  "bytecode": "0x6080604052600560005534801561001557600080fd5b5060c6806100246000396000f3fe6080604052348015600f57600080fd5b506004361060325760003560e01c806360fe47b11460375780636d4ce63c146062575b600080fd5b606060048036036020811015604b57600080fd5b8101908080359060200190929190505050607e565b005b60686088565b6040518082815260200191505060405180910390f35b8060008190555050565b6000805490509056fea265627a7a723158205fa3cef3a3f683a36fa906479bd6395bd18adbfd236bbf2b51000d06c61677df64736f6c63430005100032",
-  "deployedBytecode": "0x6080604052348015600f57600080fd5b506004361060325760003560e01c806360fe47b11460375780636d4ce63c146062575b600080fd5b606060048036036020811015604b57600080fd5b8101908080359060200190929190505050607e565b005b60686088565b6040518082815260200191505060405180910390f35b8060008190555050565b6000805490509056fea265627a7a723158205fa3cef3a3f683a36fa906479bd6395bd18adbfd236bbf2b51000d06c61677df64736f6c63430005100032",
+  "metadata": "{\"compiler\":{\"version\":\"0.5.16+commit.9c3226ce\"},\"language\":\"Solidity\",\"output\":{\"abi\":[{\"constant\":true,\"inputs\":[],\"name\":\"get\",\"outputs\":[{\"internalType\":\"uint256\",\"name\":\"\",\"type\":\"uint256\"}],\"payable\":false,\"stateMutability\":\"view\",\"type\":\"function\"},{\"constant\":false,\"inputs\":[{\"internalType\":\"uint256\",\"name\":\"x\",\"type\":\"uint256\"}],\"name\":\"set\",\"outputs\":[],\"payable\":false,\"stateMutability\":\"nonpayable\",\"type\":\"function\"}],\"devdoc\":{\"methods\":{}},\"userdoc\":{\"methods\":{}}},\"settings\":{\"compilationTarget\":{\"/home/conjohn/code/liquiditybot/contracts/SimpleStorage.sol\":\"SimpleStorage\"},\"evmVersion\":\"istanbul\",\"libraries\":{},\"optimizer\":{\"enabled\":false,\"runs\":200},\"remappings\":[]},\"sources\":{\"/home/conjohn/code/liquiditybot/contracts/SimpleStorage.sol\":{\"keccak256\":\"0xe321ad8773062bf6b48111adf02420d589300244e9af801838545a5de0748fbc\",\"urls\":[\"bzz-raw://0e32d9b206deb439ffc585d966b7f929b923fda54c67fe35109dde09bdd18be8\",\"dweb:/ipfs/QmPZLPbsCxQTWQjDDTkYfzUpPanUPWxwCVt6E582i1PRYE\"]}},\"version\":1}",
+  "bytecode": "0x6080604052600560005534801561001557600080fd5b5060c6806100246000396000f3fe6080604052348015600f57600080fd5b506004361060325760003560e01c806360fe47b11460375780636d4ce63c146062575b600080fd5b606060048036036020811015604b57600080fd5b8101908080359060200190929190505050607e565b005b60686088565b6040518082815260200191505060405180910390f35b8060008190555050565b6000805490509056fea265627a7a723158206e5cee4c8d8790d1d801f4ec11e8216b220d9d2ffee03d7f73d5d2325ad25ed564736f6c63430005100032",
+  "deployedBytecode": "0x6080604052348015600f57600080fd5b506004361060325760003560e01c806360fe47b11460375780636d4ce63c146062575b600080fd5b606060048036036020811015604b57600080fd5b8101908080359060200190929190505050607e565b005b60686088565b6040518082815260200191505060405180910390f35b8060008190555050565b6000805490509056fea265627a7a723158206e5cee4c8d8790d1d801f4ec11e8216b220d9d2ffee03d7f73d5d2325ad25ed564736f6c63430005100032",
   "sourceMap": "66:180:1:-;;;111:1;93:19;;66:180;8:9:-1;5:2;;;30:1;27;20:12;5:2;66:180:1;;;;;;;",
   "deployedSourceMap": "66:180:1:-;;;;8:9:-1;5:2;;;30:1;27;20:12;5:2;66:180:1;;;;;;;;;;;;;;;;;;;;;;;;117:53;;;;;;13:2:-1;8:3;5:11;2:2;;;29:1;26;19:12;2:2;117:53:1;;;;;;;;;;;;;;;;;:::i;:::-;;174:70;;;:::i;:::-;;;;;;;;;;;;;;;;;;;117:53;164:1;151:10;:14;;;;117:53;:::o;174:70::-;210:4;229:10;;222:17;;174:70;:::o",
   "source": "// SPDX-License-Identifier: MIT\npragma solidity >=0.4.21 <0.7.0;\n\ncontract SimpleStorage {\n  uint storedData = 5;\n\n  function set(uint x) public {\n    storedData = x;\n  }\n\n  function get() public view returns (uint) {\n    return storedData;\n  }\n}\n",
-  "sourcePath": "/home/conjohn/code/arbie/contracts/SimpleStorage.sol",
+  "sourcePath": "/home/conjohn/code/liquiditybot/contracts/SimpleStorage.sol",
   "ast": {
-    "absolutePath": "/home/conjohn/code/arbie/contracts/SimpleStorage.sol",
+    "absolutePath": "/home/conjohn/code/liquiditybot/contracts/SimpleStorage.sol",
     "exportedSymbols": {
       "SimpleStorage": [
         60
@@ -313,7 +313,7 @@
   },
   "legacyAST": {
     "attributes": {
-      "absolutePath": "/home/conjohn/code/arbie/contracts/SimpleStorage.sol",
+      "absolutePath": "/home/conjohn/code/liquiditybot/contracts/SimpleStorage.sol",
       "exportedSymbols": {
         "SimpleStorage": [
           60
@@ -634,12 +634,12 @@
     "5777": {
       "events": {},
       "links": {},
-      "address": "0x9f4e7BE15Cc3fAA263275c7483FC9A3aE94eCD47",
-      "transactionHash": "0x2d751b9a9356333770bbe18801182679e041d0619ad57d64d143a6ff80ae248a"
+      "address": "0xE98Baf30E7357DbE2d52d5C4212dd7CaF8470724",
+      "transactionHash": "0xf3f18900a6aa119f5f2ebd9db2679b345575d7cc992b72cb1df1eb9d2865090c"
     }
   },
   "schemaVersion": "3.3.3",
-  "updatedAt": "2021-01-16T04:29:31.100Z",
+  "updatedAt": "2021-01-17T17:12:48.121Z",
   "networkType": "ethereum",
   "devdoc": {
     "methods": {}
