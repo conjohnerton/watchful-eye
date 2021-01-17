@@ -1,4 +1,4 @@
-# Arbie - The Arbitrage Middleman
+# LiquidBot - The Automated Liquidation DApp!
 
 ### To run the application:
  - Open ganache or some other test chain.
