@@ -1,7 +1,6 @@
 import React from "react";
 
-const Nav = ({ isWalletConnected }) => {
-  //   isWalletConnected = true;
+const Nav = ({ isWalletConnected, connectToNetwork }) => {
   const walletConnectionBox = isWalletConnected ? (
     <div className="absolute inset-y-0 right-0 flex items-center pr-2 sm:static sm:inset-auto sm:ml-6 sm:pr-0">
       <button
@@ -13,7 +12,7 @@ const Nav = ({ isWalletConnected }) => {
     </div>
   ) : (
     <div className="absolute inset-y-0 right-0 flex items-center pr-2 sm:static sm:inset-auto sm:ml-6 sm:pr-0">
-      <button className="bg-red-500 pl-5 pr-5 pt-1 pb-1 rounded text-white hover:bg-green-700 focus:outline-none">
+      <button onClick={connectToNetwork} className="bg-red-500 pl-5 pr-5 pt-1 pb-1 rounded text-white hover:bg-green-700 focus:outline-none">
         Connect Wallet
       </button>
     </div>

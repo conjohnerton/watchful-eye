@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from "react";
+import React, { useState, useEffect } from "react";
 import SimpleStorageContract from "./contracts/SimpleStorage.json";
 import getWeb3 from "./getWeb3";
 
@@ -14,7 +14,7 @@ const App = () => {
     contract: null,
   });
 
-  const connectToNetwork = useCallback(async () => {
+  const connectToNetwork = async () => {
     try {
       // Get network provider and web3 instance.
       const web3 = await getWeb3();
@@ -42,12 +42,12 @@ const App = () => {
       return state;
     } catch (error) {
       alert(
-        `Failed to load web3, accounts, or contract. Check console for details.`
+        `Failed to load web3, accounts, or contract. Check metamask or your console for details.`
       );
       console.error(error);
       return networkState;
     }
-  });
+  };
 
   const runExample = async () => {
     let network = networkState;
@@ -59,24 +59,24 @@ const App = () => {
 
     // Stores a given value, 5 by default.
     await contract.methods.set(1).send({ from: accounts[0] });
+
     // Get the value from the contract to prove it worked.
     const response = await contract.methods.get().call();
-    // Update state with the result.
     setNetworkState({ ...networkState, storageValue: response });
   };
 
-  useEffect(() => {
-    connectToNetwork();
-    // runExample();
-  }, []);
-
   if (!networkState.web3) {
-    return <div>Loading Web3, accounts, and contract...</div>;
+    return (
+      <div>
+        <Nav isWalletConnected={false} connectToNetwork={connectToNetwork} />
+        <div>Loading Web3, accounts, and contract...</div>
+      </div>
+    );
   }
 
   return (
     <div className="App">
-      <Nav isWalletConnected={networkState.accounts} />
+      <Nav isWalletConnected={networkState.accounts} connectToNetwork={connectToNetwork} />
       <h1>Good to Go!</h1>
       <p>Your Truffle Box is installed and ready.</p>
       <h2>Smart Contract Example</h2>
