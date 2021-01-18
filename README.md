@@ -4,6 +4,7 @@
  - Open ganache or some other test chain.
  - In the `.../liquidbot` directory...
    - `truffle migrate`
+   - `npm install`
    - `cd client`
    - `npm install && npm run start`
 
