@@ -76,7 +76,11 @@ const App = () => {
 
   return (
     <div className="App">
-      <Nav isWalletConnected={networkState.accounts} connectToNetwork={connectToNetwork} />
+      <Nav
+        isWalletConnected={networkState.accounts}
+        walletAddress={networkState.accounts[0]}
+        connectToNetwork={connectToNetwork}
+      />
       <h1>Good to Go!</h1>
       <p>Your Truffle Box is installed and ready.</p>
       <h2>Smart Contract Example</h2>
