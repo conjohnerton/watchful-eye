@@ -1,0 +1,1066 @@
+{
+  "contractName": "ILendingPoolAddressesProviderRegistry",
+  "abi": [
+    {
+      "anonymous": false,
+      "inputs": [
+        {
+          "indexed": true,
+          "internalType": "address",
+          "name": "newAddress",
+          "type": "address"
+        }
+      ],
+      "name": "AddressesProviderRegistered",
+      "type": "event"
+    },
+    {
+      "anonymous": false,
+      "inputs": [
+        {
+          "indexed": true,
+          "internalType": "address",
+          "name": "newAddress",
+          "type": "address"
+        }
+      ],
+      "name": "AddressesProviderUnregistered",
+      "type": "event"
+    },
+    {
+      "inputs": [],
+      "name": "getAddressesProvidersList",
+      "outputs": [
+        {
+          "internalType": "address[]",
+          "name": "",
+          "type": "address[]"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "address",
+          "name": "addressesProvider",
+          "type": "address"
+        }
+      ],
+      "name": "getAddressesProviderIdByAddress",
+      "outputs": [
+        {
+          "internalType": "uint256",
+          "name": "",
+          "type": "uint256"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "address",
+          "name": "provider",
+          "type": "address"
+        },
+        {
+          "internalType": "uint256",
+          "name": "id",
+          "type": "uint256"
+        }
+      ],
+      "name": "registerAddressesProvider",
+      "outputs": [],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "address",
+          "name": "provider",
+          "type": "address"
+        }
+      ],
+      "name": "unregisterAddressesProvider",
+      "outputs": [],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    }
+  ],
+  "metadata": "{\"compiler\":{\"version\":\"0.6.12+commit.27d51765\"},\"language\":\"Solidity\",\"output\":{\"abi\":[{\"anonymous\":false,\"inputs\":[{\"indexed\":true,\"internalType\":\"address\",\"name\":\"newAddress\",\"type\":\"address\"}],\"name\":\"AddressesProviderRegistered\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":true,\"internalType\":\"address\",\"name\":\"newAddress\",\"type\":\"address\"}],\"name\":\"AddressesProviderUnregistered\",\"type\":\"event\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"addressesProvider\",\"type\":\"address\"}],\"name\":\"getAddressesProviderIdByAddress\",\"outputs\":[{\"internalType\":\"uint256\",\"name\":\"\",\"type\":\"uint256\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"getAddressesProvidersList\",\"outputs\":[{\"internalType\":\"address[]\",\"name\":\"\",\"type\":\"address[]\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"provider\",\"type\":\"address\"},{\"internalType\":\"uint256\",\"name\":\"id\",\"type\":\"uint256\"}],\"name\":\"registerAddressesProvider\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"provider\",\"type\":\"address\"}],\"name\":\"unregisterAddressesProvider\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"}],\"devdoc\":{\"author\":\"Aave*\",\"details\":\"Main registry of LendingPoolAddressesProvider of multiple Aave protocol's markets - Used for indexing purposes of Aave protocol's markets - The id assigned to a LendingPoolAddressesProvider refers to the market it is connected with,   for example with `0` for the Aave main market and `1` for the next created\",\"kind\":\"dev\",\"methods\":{},\"title\":\"LendingPoolAddressesProviderRegistry contract\",\"version\":1},\"userdoc\":{\"kind\":\"user\",\"methods\":{},\"version\":1}},\"settings\":{\"compilationTarget\":{\"/home/conjohn/code/liquiditybot/contracts/aave/interfaces/ILendingPoolAddressesProviderRegistry.sol\":\"ILendingPoolAddressesProviderRegistry\"},\"evmVersion\":\"istanbul\",\"libraries\":{},\"metadata\":{\"bytecodeHash\":\"ipfs\"},\"optimizer\":{\"enabled\":true,\"runs\":200},\"remappings\":[]},\"sources\":{\"/home/conjohn/code/liquiditybot/contracts/aave/interfaces/ILendingPoolAddressesProviderRegistry.sol\":{\"keccak256\":\"0xd730bacab093ef3f723668d8857d04f63c79bd6cd126405ca319dc714c0682c3\",\"license\":\"agpl-3.0\",\"urls\":[\"bzz-raw://d6edf23512beaf02216829dcc31e857edf8c8c555c8e2b522752a10da8296865\",\"dweb:/ipfs/QmU4V1hSXqPR4bsiZnP8RRTj1qBxkk43Up6Pch18xPcCC4\"]}},\"version\":1}",
+  "bytecode": "0x",
+  "deployedBytecode": "0x",
+  "immutableReferences": {},
+  "sourceMap": "",
+  "deployedSourceMap": "",
+  "source": "// SPDX-License-Identifier: agpl-3.0\npragma solidity 0.6.12;\n\n/**\n * @title LendingPoolAddressesProviderRegistry contract\n * @dev Main registry of LendingPoolAddressesProvider of multiple Aave protocol's markets\n * - Used for indexing purposes of Aave protocol's markets\n * - The id assigned to a LendingPoolAddressesProvider refers to the market it is connected with,\n *   for example with `0` for the Aave main market and `1` for the next created\n * @author Aave\n **/\ninterface ILendingPoolAddressesProviderRegistry {\n  event AddressesProviderRegistered(address indexed newAddress);\n  event AddressesProviderUnregistered(address indexed newAddress);\n\n  function getAddressesProvidersList() external view returns (address[] memory);\n\n  function getAddressesProviderIdByAddress(address addressesProvider)\n    external\n    view\n    returns (uint256);\n\n  function registerAddressesProvider(address provider, uint256 id) external;\n\n  function unregisterAddressesProvider(address provider) external;\n}\n",
+  "sourcePath": "/home/conjohn/code/liquiditybot/contracts/aave/interfaces/ILendingPoolAddressesProviderRegistry.sol",
+  "ast": {
+    "absolutePath": "/home/conjohn/code/liquiditybot/contracts/aave/interfaces/ILendingPoolAddressesProviderRegistry.sol",
+    "exportedSymbols": {
+      "ILendingPoolAddressesProviderRegistry": [
+        6084
+      ]
+    },
+    "id": 6085,
+    "license": "agpl-3.0",
+    "nodeType": "SourceUnit",
+    "nodes": [
+      {
+        "id": 6049,
+        "literals": [
+          "solidity",
+          "0.6",
+          ".12"
+        ],
+        "nodeType": "PragmaDirective",
+        "src": "37:23:36"
+      },
+      {
+        "abstract": false,
+        "baseContracts": [],
+        "contractDependencies": [],
+        "contractKind": "interface",
+        "documentation": {
+          "id": 6050,
+          "nodeType": "StructuredDocumentation",
+          "src": "62:407:36",
+          "text": " @title LendingPoolAddressesProviderRegistry contract\n @dev Main registry of LendingPoolAddressesProvider of multiple Aave protocol's markets\n - Used for indexing purposes of Aave protocol's markets\n - The id assigned to a LendingPoolAddressesProvider refers to the market it is connected with,\n   for example with `0` for the Aave main market and `1` for the next created\n @author Aave*"
+        },
+        "fullyImplemented": false,
+        "id": 6084,
+        "linearizedBaseContracts": [
+          6084
+        ],
+        "name": "ILendingPoolAddressesProviderRegistry",
+        "nodeType": "ContractDefinition",
+        "nodes": [
+          {
+            "anonymous": false,
+            "documentation": null,
+            "id": 6054,
+            "name": "AddressesProviderRegistered",
+            "nodeType": "EventDefinition",
+            "parameters": {
+              "id": 6053,
+              "nodeType": "ParameterList",
+              "parameters": [
+                {
+                  "constant": false,
+                  "id": 6052,
+                  "indexed": true,
+                  "mutability": "mutable",
+                  "name": "newAddress",
+                  "nodeType": "VariableDeclaration",
+                  "overrides": null,
+                  "scope": 6054,
+                  "src": "556:26:36",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_address",
+                    "typeString": "address"
+                  },
+                  "typeName": {
+                    "id": 6051,
+                    "name": "address",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "556:7:36",
+                    "stateMutability": "nonpayable",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_address",
+                      "typeString": "address"
+                    }
+                  },
+                  "value": null,
+                  "visibility": "internal"
+                }
+              ],
+              "src": "555:28:36"
+            },
+            "src": "522:62:36"
+          },
+          {
+            "anonymous": false,
+            "documentation": null,
+            "id": 6058,
+            "name": "AddressesProviderUnregistered",
+            "nodeType": "EventDefinition",
+            "parameters": {
+              "id": 6057,
+              "nodeType": "ParameterList",
+              "parameters": [
+                {
+                  "constant": false,
+                  "id": 6056,
+                  "indexed": true,
+                  "mutability": "mutable",
+                  "name": "newAddress",
+                  "nodeType": "VariableDeclaration",
+                  "overrides": null,
+                  "scope": 6058,
+                  "src": "623:26:36",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_address",
+                    "typeString": "address"
+                  },
+                  "typeName": {
+                    "id": 6055,
+                    "name": "address",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "623:7:36",
+                    "stateMutability": "nonpayable",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_address",
+                      "typeString": "address"
+                    }
+                  },
+                  "value": null,
+                  "visibility": "internal"
+                }
+              ],
+              "src": "622:28:36"
+            },
+            "src": "587:64:36"
+          },
+          {
+            "body": null,
+            "documentation": null,
+            "functionSelector": "365ccbbf",
+            "id": 6064,
+            "implemented": false,
+            "kind": "function",
+            "modifiers": [],
+            "name": "getAddressesProvidersList",
+            "nodeType": "FunctionDefinition",
+            "overrides": null,
+            "parameters": {
+              "id": 6059,
+              "nodeType": "ParameterList",
+              "parameters": [],
+              "src": "689:2:36"
+            },
+            "returnParameters": {
+              "id": 6063,
+              "nodeType": "ParameterList",
+              "parameters": [
+                {
+                  "constant": false,
+                  "id": 6062,
+                  "mutability": "mutable",
+                  "name": "",
+                  "nodeType": "VariableDeclaration",
+                  "overrides": null,
+                  "scope": 6064,
+                  "src": "715:16:36",
+                  "stateVariable": false,
+                  "storageLocation": "memory",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_array$_t_address_$dyn_memory_ptr",
+                    "typeString": "address[]"
+                  },
+                  "typeName": {
+                    "baseType": {
+                      "id": 6060,
+                      "name": "address",
+                      "nodeType": "ElementaryTypeName",
+                      "src": "715:7:36",
+                      "stateMutability": "nonpayable",
+                      "typeDescriptions": {
+                        "typeIdentifier": "t_address",
+                        "typeString": "address"
+                      }
+                    },
+                    "id": 6061,
+                    "length": null,
+                    "nodeType": "ArrayTypeName",
+                    "src": "715:9:36",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_array$_t_address_$dyn_storage_ptr",
+                      "typeString": "address[]"
+                    }
+                  },
+                  "value": null,
+                  "visibility": "internal"
+                }
+              ],
+              "src": "714:18:36"
+            },
+            "scope": 6084,
+            "src": "655:78:36",
+            "stateMutability": "view",
+            "virtual": false,
+            "visibility": "external"
+          },
+          {
+            "body": null,
+            "documentation": null,
+            "functionSelector": "d0267be7",
+            "id": 6071,
+            "implemented": false,
+            "kind": "function",
+            "modifiers": [],
+            "name": "getAddressesProviderIdByAddress",
+            "nodeType": "FunctionDefinition",
+            "overrides": null,
+            "parameters": {
+              "id": 6067,
+              "nodeType": "ParameterList",
+              "parameters": [
+                {
+                  "constant": false,
+                  "id": 6066,
+                  "mutability": "mutable",
+                  "name": "addressesProvider",
+                  "nodeType": "VariableDeclaration",
+                  "overrides": null,
+                  "scope": 6071,
+                  "src": "778:25:36",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_address",
+                    "typeString": "address"
+                  },
+                  "typeName": {
+                    "id": 6065,
+                    "name": "address",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "778:7:36",
+                    "stateMutability": "nonpayable",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_address",
+                      "typeString": "address"
+                    }
+                  },
+                  "value": null,
+                  "visibility": "internal"
+                }
+              ],
+              "src": "777:27:36"
+            },
+            "returnParameters": {
+              "id": 6070,
+              "nodeType": "ParameterList",
+              "parameters": [
+                {
+                  "constant": false,
+                  "id": 6069,
+                  "mutability": "mutable",
+                  "name": "",
+                  "nodeType": "VariableDeclaration",
+                  "overrides": null,
+                  "scope": 6071,
+                  "src": "840:7:36",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_uint256",
+                    "typeString": "uint256"
+                  },
+                  "typeName": {
+                    "id": 6068,
+                    "name": "uint256",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "840:7:36",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_uint256",
+                      "typeString": "uint256"
+                    }
+                  },
+                  "value": null,
+                  "visibility": "internal"
+                }
+              ],
+              "src": "839:9:36"
+            },
+            "scope": 6084,
+            "src": "737:112:36",
+            "stateMutability": "view",
+            "virtual": false,
+            "visibility": "external"
+          },
+          {
+            "body": null,
+            "documentation": null,
+            "functionSelector": "d258191e",
+            "id": 6078,
+            "implemented": false,
+            "kind": "function",
+            "modifiers": [],
+            "name": "registerAddressesProvider",
+            "nodeType": "FunctionDefinition",
+            "overrides": null,
+            "parameters": {
+              "id": 6076,
+              "nodeType": "ParameterList",
+              "parameters": [
+                {
+                  "constant": false,
+                  "id": 6073,
+                  "mutability": "mutable",
+                  "name": "provider",
+                  "nodeType": "VariableDeclaration",
+                  "overrides": null,
+                  "scope": 6078,
+                  "src": "888:16:36",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_address",
+                    "typeString": "address"
+                  },
+                  "typeName": {
+                    "id": 6072,
+                    "name": "address",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "888:7:36",
+                    "stateMutability": "nonpayable",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_address",
+                      "typeString": "address"
+                    }
+                  },
+                  "value": null,
+                  "visibility": "internal"
+                },
+                {
+                  "constant": false,
+                  "id": 6075,
+                  "mutability": "mutable",
+                  "name": "id",
+                  "nodeType": "VariableDeclaration",
+                  "overrides": null,
+                  "scope": 6078,
+                  "src": "906:10:36",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_uint256",
+                    "typeString": "uint256"
+                  },
+                  "typeName": {
+                    "id": 6074,
+                    "name": "uint256",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "906:7:36",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_uint256",
+                      "typeString": "uint256"
+                    }
+                  },
+                  "value": null,
+                  "visibility": "internal"
+                }
+              ],
+              "src": "887:30:36"
+            },
+            "returnParameters": {
+              "id": 6077,
+              "nodeType": "ParameterList",
+              "parameters": [],
+              "src": "926:0:36"
+            },
+            "scope": 6084,
+            "src": "853:74:36",
+            "stateMutability": "nonpayable",
+            "virtual": false,
+            "visibility": "external"
+          },
+          {
+            "body": null,
+            "documentation": null,
+            "functionSelector": "0de26707",
+            "id": 6083,
+            "implemented": false,
+            "kind": "function",
+            "modifiers": [],
+            "name": "unregisterAddressesProvider",
+            "nodeType": "FunctionDefinition",
+            "overrides": null,
+            "parameters": {
+              "id": 6081,
+              "nodeType": "ParameterList",
+              "parameters": [
+                {
+                  "constant": false,
+                  "id": 6080,
+                  "mutability": "mutable",
+                  "name": "provider",
+                  "nodeType": "VariableDeclaration",
+                  "overrides": null,
+                  "scope": 6083,
+                  "src": "968:16:36",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_address",
+                    "typeString": "address"
+                  },
+                  "typeName": {
+                    "id": 6079,
+                    "name": "address",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "968:7:36",
+                    "stateMutability": "nonpayable",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_address",
+                      "typeString": "address"
+                    }
+                  },
+                  "value": null,
+                  "visibility": "internal"
+                }
+              ],
+              "src": "967:18:36"
+            },
+            "returnParameters": {
+              "id": 6082,
+              "nodeType": "ParameterList",
+              "parameters": [],
+              "src": "994:0:36"
+            },
+            "scope": 6084,
+            "src": "931:64:36",
+            "stateMutability": "nonpayable",
+            "virtual": false,
+            "visibility": "external"
+          }
+        ],
+        "scope": 6085,
+        "src": "470:527:36"
+      }
+    ],
+    "src": "37:961:36"
+  },
+  "legacyAST": {
+    "attributes": {
+      "absolutePath": "/home/conjohn/code/liquiditybot/contracts/aave/interfaces/ILendingPoolAddressesProviderRegistry.sol",
+      "exportedSymbols": {
+        "ILendingPoolAddressesProviderRegistry": [
+          6084
+        ]
+      },
+      "license": "agpl-3.0"
+    },
+    "children": [
+      {
+        "attributes": {
+          "literals": [
+            "solidity",
+            "0.6",
+            ".12"
+          ]
+        },
+        "id": 6049,
+        "name": "PragmaDirective",
+        "src": "37:23:36"
+      },
+      {
+        "attributes": {
+          "abstract": false,
+          "baseContracts": [
+            null
+          ],
+          "contractDependencies": [
+            null
+          ],
+          "contractKind": "interface",
+          "fullyImplemented": false,
+          "linearizedBaseContracts": [
+            6084
+          ],
+          "name": "ILendingPoolAddressesProviderRegistry",
+          "scope": 6085
+        },
+        "children": [
+          {
+            "attributes": {
+              "text": " @title LendingPoolAddressesProviderRegistry contract\n @dev Main registry of LendingPoolAddressesProvider of multiple Aave protocol's markets\n - Used for indexing purposes of Aave protocol's markets\n - The id assigned to a LendingPoolAddressesProvider refers to the market it is connected with,\n   for example with `0` for the Aave main market and `1` for the next created\n @author Aave*"
+            },
+            "id": 6050,
+            "name": "StructuredDocumentation",
+            "src": "62:407:36"
+          },
+          {
+            "attributes": {
+              "anonymous": false,
+              "documentation": null,
+              "name": "AddressesProviderRegistered"
+            },
+            "children": [
+              {
+                "children": [
+                  {
+                    "attributes": {
+                      "constant": false,
+                      "indexed": true,
+                      "mutability": "mutable",
+                      "name": "newAddress",
+                      "overrides": null,
+                      "scope": 6054,
+                      "stateVariable": false,
+                      "storageLocation": "default",
+                      "type": "address",
+                      "value": null,
+                      "visibility": "internal"
+                    },
+                    "children": [
+                      {
+                        "attributes": {
+                          "name": "address",
+                          "stateMutability": "nonpayable",
+                          "type": "address"
+                        },
+                        "id": 6051,
+                        "name": "ElementaryTypeName",
+                        "src": "556:7:36"
+                      }
+                    ],
+                    "id": 6052,
+                    "name": "VariableDeclaration",
+                    "src": "556:26:36"
+                  }
+                ],
+                "id": 6053,
+                "name": "ParameterList",
+                "src": "555:28:36"
+              }
+            ],
+            "id": 6054,
+            "name": "EventDefinition",
+            "src": "522:62:36"
+          },
+          {
+            "attributes": {
+              "anonymous": false,
+              "documentation": null,
+              "name": "AddressesProviderUnregistered"
+            },
+            "children": [
+              {
+                "children": [
+                  {
+                    "attributes": {
+                      "constant": false,
+                      "indexed": true,
+                      "mutability": "mutable",
+                      "name": "newAddress",
+                      "overrides": null,
+                      "scope": 6058,
+                      "stateVariable": false,
+                      "storageLocation": "default",
+                      "type": "address",
+                      "value": null,
+                      "visibility": "internal"
+                    },
+                    "children": [
+                      {
+                        "attributes": {
+                          "name": "address",
+                          "stateMutability": "nonpayable",
+                          "type": "address"
+                        },
+                        "id": 6055,
+                        "name": "ElementaryTypeName",
+                        "src": "623:7:36"
+                      }
+                    ],
+                    "id": 6056,
+                    "name": "VariableDeclaration",
+                    "src": "623:26:36"
+                  }
+                ],
+                "id": 6057,
+                "name": "ParameterList",
+                "src": "622:28:36"
+              }
+            ],
+            "id": 6058,
+            "name": "EventDefinition",
+            "src": "587:64:36"
+          },
+          {
+            "attributes": {
+              "body": null,
+              "documentation": null,
+              "functionSelector": "365ccbbf",
+              "implemented": false,
+              "isConstructor": false,
+              "kind": "function",
+              "modifiers": [
+                null
+              ],
+              "name": "getAddressesProvidersList",
+              "overrides": null,
+              "scope": 6084,
+              "stateMutability": "view",
+              "virtual": false,
+              "visibility": "external"
+            },
+            "children": [
+              {
+                "attributes": {
+                  "parameters": [
+                    null
+                  ]
+                },
+                "children": [],
+                "id": 6059,
+                "name": "ParameterList",
+                "src": "689:2:36"
+              },
+              {
+                "children": [
+                  {
+                    "attributes": {
+                      "constant": false,
+                      "mutability": "mutable",
+                      "name": "",
+                      "overrides": null,
+                      "scope": 6064,
+                      "stateVariable": false,
+                      "storageLocation": "memory",
+                      "type": "address[]",
+                      "value": null,
+                      "visibility": "internal"
+                    },
+                    "children": [
+                      {
+                        "attributes": {
+                          "length": null,
+                          "type": "address[]"
+                        },
+                        "children": [
+                          {
+                            "attributes": {
+                              "name": "address",
+                              "stateMutability": "nonpayable",
+                              "type": "address"
+                            },
+                            "id": 6060,
+                            "name": "ElementaryTypeName",
+                            "src": "715:7:36"
+                          }
+                        ],
+                        "id": 6061,
+                        "name": "ArrayTypeName",
+                        "src": "715:9:36"
+                      }
+                    ],
+                    "id": 6062,
+                    "name": "VariableDeclaration",
+                    "src": "715:16:36"
+                  }
+                ],
+                "id": 6063,
+                "name": "ParameterList",
+                "src": "714:18:36"
+              }
+            ],
+            "id": 6064,
+            "name": "FunctionDefinition",
+            "src": "655:78:36"
+          },
+          {
+            "attributes": {
+              "body": null,
+              "documentation": null,
+              "functionSelector": "d0267be7",
+              "implemented": false,
+              "isConstructor": false,
+              "kind": "function",
+              "modifiers": [
+                null
+              ],
+              "name": "getAddressesProviderIdByAddress",
+              "overrides": null,
+              "scope": 6084,
+              "stateMutability": "view",
+              "virtual": false,
+              "visibility": "external"
+            },
+            "children": [
+              {
+                "children": [
+                  {
+                    "attributes": {
+                      "constant": false,
+                      "mutability": "mutable",
+                      "name": "addressesProvider",
+                      "overrides": null,
+                      "scope": 6071,
+                      "stateVariable": false,
+                      "storageLocation": "default",
+                      "type": "address",
+                      "value": null,
+                      "visibility": "internal"
+                    },
+                    "children": [
+                      {
+                        "attributes": {
+                          "name": "address",
+                          "stateMutability": "nonpayable",
+                          "type": "address"
+                        },
+                        "id": 6065,
+                        "name": "ElementaryTypeName",
+                        "src": "778:7:36"
+                      }
+                    ],
+                    "id": 6066,
+                    "name": "VariableDeclaration",
+                    "src": "778:25:36"
+                  }
+                ],
+                "id": 6067,
+                "name": "ParameterList",
+                "src": "777:27:36"
+              },
+              {
+                "children": [
+                  {
+                    "attributes": {
+                      "constant": false,
+                      "mutability": "mutable",
+                      "name": "",
+                      "overrides": null,
+                      "scope": 6071,
+                      "stateVariable": false,
+                      "storageLocation": "default",
+                      "type": "uint256",
+                      "value": null,
+                      "visibility": "internal"
+                    },
+                    "children": [
+                      {
+                        "attributes": {
+                          "name": "uint256",
+                          "type": "uint256"
+                        },
+                        "id": 6068,
+                        "name": "ElementaryTypeName",
+                        "src": "840:7:36"
+                      }
+                    ],
+                    "id": 6069,
+                    "name": "VariableDeclaration",
+                    "src": "840:7:36"
+                  }
+                ],
+                "id": 6070,
+                "name": "ParameterList",
+                "src": "839:9:36"
+              }
+            ],
+            "id": 6071,
+            "name": "FunctionDefinition",
+            "src": "737:112:36"
+          },
+          {
+            "attributes": {
+              "body": null,
+              "documentation": null,
+              "functionSelector": "d258191e",
+              "implemented": false,
+              "isConstructor": false,
+              "kind": "function",
+              "modifiers": [
+                null
+              ],
+              "name": "registerAddressesProvider",
+              "overrides": null,
+              "scope": 6084,
+              "stateMutability": "nonpayable",
+              "virtual": false,
+              "visibility": "external"
+            },
+            "children": [
+              {
+                "children": [
+                  {
+                    "attributes": {
+                      "constant": false,
+                      "mutability": "mutable",
+                      "name": "provider",
+                      "overrides": null,
+                      "scope": 6078,
+                      "stateVariable": false,
+                      "storageLocation": "default",
+                      "type": "address",
+                      "value": null,
+                      "visibility": "internal"
+                    },
+                    "children": [
+                      {
+                        "attributes": {
+                          "name": "address",
+                          "stateMutability": "nonpayable",
+                          "type": "address"
+                        },
+                        "id": 6072,
+                        "name": "ElementaryTypeName",
+                        "src": "888:7:36"
+                      }
+                    ],
+                    "id": 6073,
+                    "name": "VariableDeclaration",
+                    "src": "888:16:36"
+                  },
+                  {
+                    "attributes": {
+                      "constant": false,
+                      "mutability": "mutable",
+                      "name": "id",
+                      "overrides": null,
+                      "scope": 6078,
+                      "stateVariable": false,
+                      "storageLocation": "default",
+                      "type": "uint256",
+                      "value": null,
+                      "visibility": "internal"
+                    },
+                    "children": [
+                      {
+                        "attributes": {
+                          "name": "uint256",
+                          "type": "uint256"
+                        },
+                        "id": 6074,
+                        "name": "ElementaryTypeName",
+                        "src": "906:7:36"
+                      }
+                    ],
+                    "id": 6075,
+                    "name": "VariableDeclaration",
+                    "src": "906:10:36"
+                  }
+                ],
+                "id": 6076,
+                "name": "ParameterList",
+                "src": "887:30:36"
+              },
+              {
+                "attributes": {
+                  "parameters": [
+                    null
+                  ]
+                },
+                "children": [],
+                "id": 6077,
+                "name": "ParameterList",
+                "src": "926:0:36"
+              }
+            ],
+            "id": 6078,
+            "name": "FunctionDefinition",
+            "src": "853:74:36"
+          },
+          {
+            "attributes": {
+              "body": null,
+              "documentation": null,
+              "functionSelector": "0de26707",
+              "implemented": false,
+              "isConstructor": false,
+              "kind": "function",
+              "modifiers": [
+                null
+              ],
+              "name": "unregisterAddressesProvider",
+              "overrides": null,
+              "scope": 6084,
+              "stateMutability": "nonpayable",
+              "virtual": false,
+              "visibility": "external"
+            },
+            "children": [
+              {
+                "children": [
+                  {
+                    "attributes": {
+                      "constant": false,
+                      "mutability": "mutable",
+                      "name": "provider",
+                      "overrides": null,
+                      "scope": 6083,
+                      "stateVariable": false,
+                      "storageLocation": "default",
+                      "type": "address",
+                      "value": null,
+                      "visibility": "internal"
+                    },
+                    "children": [
+                      {
+                        "attributes": {
+                          "name": "address",
+                          "stateMutability": "nonpayable",
+                          "type": "address"
+                        },
+                        "id": 6079,
+                        "name": "ElementaryTypeName",
+                        "src": "968:7:36"
+                      }
+                    ],
+                    "id": 6080,
+                    "name": "VariableDeclaration",
+                    "src": "968:16:36"
+                  }
+                ],
+                "id": 6081,
+                "name": "ParameterList",
+                "src": "967:18:36"
+              },
+              {
+                "attributes": {
+                  "parameters": [
+                    null
+                  ]
+                },
+                "children": [],
+                "id": 6082,
+                "name": "ParameterList",
+                "src": "994:0:36"
+              }
+            ],
+            "id": 6083,
+            "name": "FunctionDefinition",
+            "src": "931:64:36"
+          }
+        ],
+        "id": 6084,
+        "name": "ContractDefinition",
+        "src": "470:527:36"
+      }
+    ],
+    "id": 6085,
+    "name": "SourceUnit",
+    "src": "37:961:36"
+  },
+  "compiler": {
+    "name": "solc",
+    "version": "0.6.12+commit.27d51765.Emscripten.clang"
+  },
+  "networks": {},
+  "schemaVersion": "3.3.3",
+  "updatedAt": "2021-01-19T17:51:24.302Z",
+  "devdoc": {
+    "author": "Aave*",
+    "details": "Main registry of LendingPoolAddressesProvider of multiple Aave protocol's markets - Used for indexing purposes of Aave protocol's markets - The id assigned to a LendingPoolAddressesProvider refers to the market it is connected with,   for example with `0` for the Aave main market and `1` for the next created",
+    "kind": "dev",
+    "methods": {},
+    "title": "LendingPoolAddressesProviderRegistry contract",
+    "version": 1
+  },
+  "userdoc": {
+    "kind": "user",
+    "methods": {},
+    "version": 1
+  }
+}

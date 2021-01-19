@@ -1,0 +1,337 @@
+{
+  "contractName": "IERC20DetailedBytes",
+  "abi": [
+    {
+      "inputs": [],
+      "name": "decimals",
+      "outputs": [
+        {
+          "internalType": "uint256",
+          "name": "",
+          "type": "uint256"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [],
+      "name": "name",
+      "outputs": [
+        {
+          "internalType": "bytes32",
+          "name": "",
+          "type": "bytes32"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [],
+      "name": "symbol",
+      "outputs": [
+        {
+          "internalType": "bytes32",
+          "name": "",
+          "type": "bytes32"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    }
+  ],
+  "metadata": "{\"compiler\":{\"version\":\"0.6.12+commit.27d51765\"},\"language\":\"Solidity\",\"output\":{\"abi\":[{\"inputs\":[],\"name\":\"decimals\",\"outputs\":[{\"internalType\":\"uint256\",\"name\":\"\",\"type\":\"uint256\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"name\",\"outputs\":[{\"internalType\":\"bytes32\",\"name\":\"\",\"type\":\"bytes32\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"symbol\",\"outputs\":[{\"internalType\":\"bytes32\",\"name\":\"\",\"type\":\"bytes32\"}],\"stateMutability\":\"view\",\"type\":\"function\"}],\"devdoc\":{\"kind\":\"dev\",\"methods\":{},\"version\":1},\"userdoc\":{\"kind\":\"user\",\"methods\":{},\"version\":1}},\"settings\":{\"compilationTarget\":{\"/home/conjohn/code/liquiditybot/contracts/aave/misc/interfaces/IERC20DetailedBytes.sol\":\"IERC20DetailedBytes\"},\"evmVersion\":\"istanbul\",\"libraries\":{},\"metadata\":{\"bytecodeHash\":\"ipfs\"},\"optimizer\":{\"enabled\":true,\"runs\":200},\"remappings\":[]},\"sources\":{\"/home/conjohn/code/liquiditybot/contracts/aave/misc/interfaces/IERC20DetailedBytes.sol\":{\"keccak256\":\"0x9c4e726f58c389e0540605654a60e82211092af34ef52404767fe3efffbb63d6\",\"license\":\"agpl-3.0\",\"urls\":[\"bzz-raw://90e66a79fb58cc179d15fd2a97518fb86084c9edf2917842d539c5b8a48ae37c\",\"dweb:/ipfs/QmRN5th4jY4eU6UUwSt4E8Y2uNStimkTjcLbrkdJguhNGf\"]}},\"version\":1}",
+  "bytecode": "0x608060405234801561001057600080fd5b5060ad8061001f6000396000f3fe6080604052348015600f57600080fd5b5060043610603c5760003560e01c806306fdde03146041578063313ce56714605957806395d89b4114605f575b600080fd5b60476065565b60408051918252519081900360200190f35b6047606b565b60476071565b60005481565b60025481565b6001548156fea264697066735822122097ddb48e4333bbfbdbc52bf33c6c589e372afbccf46f222fed60f67ad5a17a6d64736f6c634300060c0033",
+  "deployedBytecode": "0x6080604052348015600f57600080fd5b5060043610603c5760003560e01c806306fdde03146041578063313ce56714605957806395d89b4114605f575b600080fd5b60476065565b60408051918252519081900360200190f35b6047606b565b60476071565b60005481565b60025481565b6001548156fea264697066735822122097ddb48e4333bbfbdbc52bf33c6c589e372afbccf46f222fed60f67ad5a17a6d64736f6c634300060c0033",
+  "immutableReferences": {},
+  "sourceMap": "62:107:53:-:0;;;;;;;;;;;;;;;;;;;",
+  "deployedSourceMap": "62:107:53:-:0;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;95:19;;;:::i;:::-;;;;;;;;;;;;;;;;143:23;;;:::i;118:21::-;;;:::i;95:19::-;;;;:::o;143:23::-;;;;:::o;118:21::-;;;;:::o",
+  "source": "// SPDX-License-Identifier: agpl-3.0\npragma solidity 0.6.12;\n\ncontract IERC20DetailedBytes {\n  bytes32 public name;\n  bytes32 public symbol;\n  uint256 public decimals;\n}\n",
+  "sourcePath": "/home/conjohn/code/liquiditybot/contracts/aave/misc/interfaces/IERC20DetailedBytes.sol",
+  "ast": {
+    "absolutePath": "/home/conjohn/code/liquiditybot/contracts/aave/misc/interfaces/IERC20DetailedBytes.sol",
+    "exportedSymbols": {
+      "IERC20DetailedBytes": [
+        8649
+      ]
+    },
+    "id": 8650,
+    "license": "agpl-3.0",
+    "nodeType": "SourceUnit",
+    "nodes": [
+      {
+        "id": 8642,
+        "literals": [
+          "solidity",
+          "0.6",
+          ".12"
+        ],
+        "nodeType": "PragmaDirective",
+        "src": "37:23:53"
+      },
+      {
+        "abstract": false,
+        "baseContracts": [],
+        "contractDependencies": [],
+        "contractKind": "contract",
+        "documentation": null,
+        "fullyImplemented": true,
+        "id": 8649,
+        "linearizedBaseContracts": [
+          8649
+        ],
+        "name": "IERC20DetailedBytes",
+        "nodeType": "ContractDefinition",
+        "nodes": [
+          {
+            "constant": false,
+            "functionSelector": "06fdde03",
+            "id": 8644,
+            "mutability": "mutable",
+            "name": "name",
+            "nodeType": "VariableDeclaration",
+            "overrides": null,
+            "scope": 8649,
+            "src": "95:19:53",
+            "stateVariable": true,
+            "storageLocation": "default",
+            "typeDescriptions": {
+              "typeIdentifier": "t_bytes32",
+              "typeString": "bytes32"
+            },
+            "typeName": {
+              "id": 8643,
+              "name": "bytes32",
+              "nodeType": "ElementaryTypeName",
+              "src": "95:7:53",
+              "typeDescriptions": {
+                "typeIdentifier": "t_bytes32",
+                "typeString": "bytes32"
+              }
+            },
+            "value": null,
+            "visibility": "public"
+          },
+          {
+            "constant": false,
+            "functionSelector": "95d89b41",
+            "id": 8646,
+            "mutability": "mutable",
+            "name": "symbol",
+            "nodeType": "VariableDeclaration",
+            "overrides": null,
+            "scope": 8649,
+            "src": "118:21:53",
+            "stateVariable": true,
+            "storageLocation": "default",
+            "typeDescriptions": {
+              "typeIdentifier": "t_bytes32",
+              "typeString": "bytes32"
+            },
+            "typeName": {
+              "id": 8645,
+              "name": "bytes32",
+              "nodeType": "ElementaryTypeName",
+              "src": "118:7:53",
+              "typeDescriptions": {
+                "typeIdentifier": "t_bytes32",
+                "typeString": "bytes32"
+              }
+            },
+            "value": null,
+            "visibility": "public"
+          },
+          {
+            "constant": false,
+            "functionSelector": "313ce567",
+            "id": 8648,
+            "mutability": "mutable",
+            "name": "decimals",
+            "nodeType": "VariableDeclaration",
+            "overrides": null,
+            "scope": 8649,
+            "src": "143:23:53",
+            "stateVariable": true,
+            "storageLocation": "default",
+            "typeDescriptions": {
+              "typeIdentifier": "t_uint256",
+              "typeString": "uint256"
+            },
+            "typeName": {
+              "id": 8647,
+              "name": "uint256",
+              "nodeType": "ElementaryTypeName",
+              "src": "143:7:53",
+              "typeDescriptions": {
+                "typeIdentifier": "t_uint256",
+                "typeString": "uint256"
+              }
+            },
+            "value": null,
+            "visibility": "public"
+          }
+        ],
+        "scope": 8650,
+        "src": "62:107:53"
+      }
+    ],
+    "src": "37:133:53"
+  },
+  "legacyAST": {
+    "attributes": {
+      "absolutePath": "/home/conjohn/code/liquiditybot/contracts/aave/misc/interfaces/IERC20DetailedBytes.sol",
+      "exportedSymbols": {
+        "IERC20DetailedBytes": [
+          8649
+        ]
+      },
+      "license": "agpl-3.0"
+    },
+    "children": [
+      {
+        "attributes": {
+          "literals": [
+            "solidity",
+            "0.6",
+            ".12"
+          ]
+        },
+        "id": 8642,
+        "name": "PragmaDirective",
+        "src": "37:23:53"
+      },
+      {
+        "attributes": {
+          "abstract": false,
+          "baseContracts": [
+            null
+          ],
+          "contractDependencies": [
+            null
+          ],
+          "contractKind": "contract",
+          "documentation": null,
+          "fullyImplemented": true,
+          "linearizedBaseContracts": [
+            8649
+          ],
+          "name": "IERC20DetailedBytes",
+          "scope": 8650
+        },
+        "children": [
+          {
+            "attributes": {
+              "constant": false,
+              "functionSelector": "06fdde03",
+              "mutability": "mutable",
+              "name": "name",
+              "overrides": null,
+              "scope": 8649,
+              "stateVariable": true,
+              "storageLocation": "default",
+              "type": "bytes32",
+              "value": null,
+              "visibility": "public"
+            },
+            "children": [
+              {
+                "attributes": {
+                  "name": "bytes32",
+                  "type": "bytes32"
+                },
+                "id": 8643,
+                "name": "ElementaryTypeName",
+                "src": "95:7:53"
+              }
+            ],
+            "id": 8644,
+            "name": "VariableDeclaration",
+            "src": "95:19:53"
+          },
+          {
+            "attributes": {
+              "constant": false,
+              "functionSelector": "95d89b41",
+              "mutability": "mutable",
+              "name": "symbol",
+              "overrides": null,
+              "scope": 8649,
+              "stateVariable": true,
+              "storageLocation": "default",
+              "type": "bytes32",
+              "value": null,
+              "visibility": "public"
+            },
+            "children": [
+              {
+                "attributes": {
+                  "name": "bytes32",
+                  "type": "bytes32"
+                },
+                "id": 8645,
+                "name": "ElementaryTypeName",
+                "src": "118:7:53"
+              }
+            ],
+            "id": 8646,
+            "name": "VariableDeclaration",
+            "src": "118:21:53"
+          },
+          {
+            "attributes": {
+              "constant": false,
+              "functionSelector": "313ce567",
+              "mutability": "mutable",
+              "name": "decimals",
+              "overrides": null,
+              "scope": 8649,
+              "stateVariable": true,
+              "storageLocation": "default",
+              "type": "uint256",
+              "value": null,
+              "visibility": "public"
+            },
+            "children": [
+              {
+                "attributes": {
+                  "name": "uint256",
+                  "type": "uint256"
+                },
+                "id": 8647,
+                "name": "ElementaryTypeName",
+                "src": "143:7:53"
+              }
+            ],
+            "id": 8648,
+            "name": "VariableDeclaration",
+            "src": "143:23:53"
+          }
+        ],
+        "id": 8649,
+        "name": "ContractDefinition",
+        "src": "62:107:53"
+      }
+    ],
+    "id": 8650,
+    "name": "SourceUnit",
+    "src": "37:133:53"
+  },
+  "compiler": {
+    "name": "solc",
+    "version": "0.6.12+commit.27d51765.Emscripten.clang"
+  },
+  "networks": {},
+  "schemaVersion": "3.3.3",
+  "updatedAt": "2021-01-19T17:51:24.325Z",
+  "devdoc": {
+    "kind": "dev",
+    "methods": {},
+    "version": 1
+  },
+  "userdoc": {
+    "kind": "user",
+    "methods": {},
+    "version": 1
+  }
+}
