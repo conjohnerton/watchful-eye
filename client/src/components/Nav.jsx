@@ -34,7 +34,7 @@ const Nav = ({ isWalletConnected, walletAddress, connectToNetwork }) => {
         disabled={true}
         className="flex space-x-2 border-white hover:shadow-lg border-5 pl-5 pr-5 pt-1 pb-1 rounded text-white focus:outline-none"
       >
-        {copied ? <p className="text-green-500">Copied!</p> : null}
+        {copied ? <p className="text-green-300">Address Copied!</p> : null}
         <Blockie seed={walletAddress} size={6} />{" "}
         <div id="walletAddress">{walletAddress}</div>
       </button>
