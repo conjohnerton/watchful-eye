@@ -55753,7 +55753,7 @@
   },
   "networks": {},
   "schemaVersion": "3.3.3",
-  "updatedAt": "2021-01-19T17:51:24.353Z",
+  "updatedAt": "2021-01-20T15:41:38.270Z",
   "devdoc": {
     "author": "Aave*",
     "details": "Main point of interaction with an Aave protocol's market - Users can:   # Deposit   # Withdraw   # Borrow   # Repay   # Swap their loans between variable and stable rate   # Enable/disable their deposits as collateral rebalance stable rate borrow positions   # Liquidate positions   # Execute Flash Loans - To be covered by a proxy contract, owned by the LendingPoolAddressesProvider of the specific market - All admin functions are callable by the LendingPoolConfigurator contract defined also in the   LendingPoolAddressesProvider",

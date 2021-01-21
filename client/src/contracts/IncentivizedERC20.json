@@ -17726,7 +17726,7 @@
   },
   "networks": {},
   "schemaVersion": "3.3.3",
-  "updatedAt": "2021-01-19T17:51:24.426Z",
+  "updatedAt": "2021-01-20T15:41:38.357Z",
   "devdoc": {
     "author": "Aave, inspired by the Openzeppelin ERC20 implementation*",
     "kind": "dev",

@@ -30894,7 +30894,7 @@
   },
   "networks": {},
   "schemaVersion": "3.3.3",
-  "updatedAt": "2021-01-19T17:51:24.375Z",
+  "updatedAt": "2021-01-20T15:41:38.302Z",
   "devdoc": {
     "author": "Aave",
     "details": "Implements the configuration methods for the Aave protocol*",

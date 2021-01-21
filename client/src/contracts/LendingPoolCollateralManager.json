@@ -20496,7 +20496,7 @@
   },
   "networks": {},
   "schemaVersion": "3.3.3",
-  "updatedAt": "2021-01-19T17:51:24.369Z",
+  "updatedAt": "2021-01-20T15:41:38.291Z",
   "devdoc": {
     "author": "Aave",
     "details": "Implements actions involving management of collateral in the protocol, the main one being the liquidations IMPORTANT This contract will run always via DELEGATECALL, through the LendingPool, so the chain of inheritance is the same as the LendingPool, to have compatible storage layouts*",

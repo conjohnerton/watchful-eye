@@ -20359,7 +20359,7 @@
   },
   "networks": {},
   "schemaVersion": "3.3.3",
-  "updatedAt": "2021-01-19T17:51:24.419Z",
+  "updatedAt": "2021-01-20T15:41:38.345Z",
   "devdoc": {
     "author": "Aave",
     "details": "Implementation of the interest bearing token for the Aave protocol",

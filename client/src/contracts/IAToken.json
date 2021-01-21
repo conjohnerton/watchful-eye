@@ -2868,7 +2868,7 @@
   },
   "networks": {},
   "schemaVersion": "3.3.3",
-  "updatedAt": "2021-01-19T17:51:24.295Z",
+  "updatedAt": "2021-01-20T15:41:38.216Z",
   "devdoc": {
     "events": {
       "BalanceTransfer(address,address,uint256,uint256)": {

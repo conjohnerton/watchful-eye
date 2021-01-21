@@ -86,10 +86,10 @@ class Meter extends Component {
     const min = this.props.min;
     const max = this.props.max;
     const transform = { transform: "rotate(" + this.valueToDegrees() + "deg)" };
-    const needleStyles = styles.needle;
-    // const needleStyles = this.validateProps()
-    //   ? Object.assign(styles.needle, transform)
-    //   : styles.needle;
+    // const needleStyles = styles.needle;
+    const needleStyles = this.validateProps()
+      ? Object.assign(styles.needle, transform)
+      : styles.needle;
     return (
       <div style={styles.container}>
         <h2 style={styles.value}>
