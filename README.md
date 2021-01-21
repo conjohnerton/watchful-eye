@@ -1,6 +1,6 @@
-# 🏗 scaffold-eth
+# Liqui-bot
 
-> is everything you need to get started building decentralized applications powered by smart contracts
+> scaffold-eth is great and that's why we're using it.
 
 ---
 
