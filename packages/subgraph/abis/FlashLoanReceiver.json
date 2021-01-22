@@ -126,6 +126,24 @@
   {
     "inputs": [
       {
+        "internalType": "uint256",
+        "name": "collateralPriceLimit",
+        "type": "uint256"
+      },
+      {
+        "internalType": "uint256",
+        "name": "debtPriceLimit",
+        "type": "uint256"
+      }
+    ],
+    "name": "addWatchfulEye",
+    "outputs": [],
+    "stateMutability": "payable",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
         "internalType": "address[]",
         "name": "assets",
         "type": "address[]"
@@ -164,7 +182,20 @@
   },
   {
     "inputs": [],
-    "name": "myFlashLoanCall",
+    "name": "isWatchfulEyeOpen",
+    "outputs": [
+      {
+        "internalType": "bool",
+        "name": "isOpen",
+        "type": "bool"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [],
+    "name": "makeFlashLoan",
     "outputs": [],
     "stateMutability": "nonpayable",
     "type": "function"

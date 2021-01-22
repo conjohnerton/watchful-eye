@@ -124,6 +124,9 @@ function App() {
   //   console.log("FlashLoanEndedEvents", FlashLoanEndedEvents);
   // }, [FlashLoanEndedEvents, BorrowMadeEvents, FlashLoanStartedEvents]);
 
+  // Ask WatchfulEye if it's open
+  const isWatchfulEyeOpen = useContractReader(readContracts, "FlashLoanReceiver", "isWatchfulEyeOpen");
+  
   /*
   const addressFromENS = useResolveName(mainnetProvider, "austingriffith.eth");
   console.log("🏷 Resolved austingriffith.eth as:",addressFromENS)
@@ -154,14 +157,13 @@ function App() {
         address={address}
         blockExplorer={blockExplorer}
       />
-      {/* <Contract
-        name="LendingPool"
-        customContract={LendingPool}
+      <Contract
+        name="SETUP1InchFakeSwap"
         signer={userProvider.getSigner()}
         provider={injectedProvider}
-        // address={address}
+        address={address}
         blockExplorer={blockExplorer}
-      /> */}
+      />
     </>
   );
 
