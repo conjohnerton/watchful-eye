@@ -4,11 +4,12 @@ import "./aave/mocks/tokens/MintableERC20.sol";
 import "./aave/flashloan/base/FlashLoanReceiverBase.sol";
 import "./aave/protocol/configuration/LendingPoolAddressesProvider.sol";
 
-
 contract FlashLoanReceiver is FlashLoanReceiverBase {
     using SafeMath for uint256;
 
     event borrowMade(address _reserve, uint256 amount , uint256 value);
+    event FlashLoanStarted(address receiver, address[] assets, uint256[] amounts, bytes params);
+    event FlashLoanEnded(address receiver, address[] assets, uint256[] amounts, bytes params);
 
     constructor(LendingPoolAddressesProvider _provider) FlashLoanReceiverBase(_provider) public {}
 
@@ -43,20 +44,21 @@ contract FlashLoanReceiver is FlashLoanReceiverBase {
     function myFlashLoanCall() public {
         address receiverAddress = address(this);
 
-        address[] memory assets = new address[](2);
+        address[] memory assets = new address[](1);
         assets[0] = 0xFf795577d9AC8bD7D90Ee22b6C1703490b6512FD; // Kovan DAI
 
-        uint256[] memory amounts = new uint256[](2);
-        amounts[0] = 100;
+        uint256[] memory amounts = new uint256[](1);
+        amounts[0] = 10000000;
 
         // 0 = no debt, 1 = stable, 2 = variable
-        uint256[] memory modes = new uint256[](2);
+        uint256[] memory modes = new uint256[](1);
         modes[0] = 0;
 
-        address onBehalfOf = address(this);
+        address onBehalfOf = msg.sender;
         bytes memory params = "";
         uint16 referralCode = 0;
 
+        emit FlashLoanStarted(receiverAddress, assets, amounts, params);
         LENDING_POOL.flashLoan(
             receiverAddress,
             assets,
@@ -66,5 +68,6 @@ contract FlashLoanReceiver is FlashLoanReceiverBase {
             params,
             referralCode
         );
+        emit FlashLoanEnded(receiverAddress, assets, amounts, params);
     }
 }

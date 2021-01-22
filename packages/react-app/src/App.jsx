@@ -3,7 +3,7 @@ import { BrowserRouter, Switch, Route, Link } from "react-router-dom";
 import "antd/dist/antd.css";
 import { InfuraProvider, JsonRpcProvider, Web3Provider } from "@ethersproject/providers";
 import "./App.css";
-import { Row, Col, Button, Menu } from "antd";
+import { Row, Col, Menu } from "antd";
 import Web3Modal from "web3modal";
 import WalletConnectProvider from "@walletconnect/web3-provider";
 import { useUserAddress } from "eth-hooks";
@@ -13,13 +13,10 @@ import {
   useUserProvider,
   useContractLoader,
   useContractReader,
-  useEventListener,
-  useBalance,
+  // useEventListener,
   useExternalContractLoader,
 } from "./hooks";
-import { Header, Account, Faucet, Ramp, Contract, GasGauge } from "./components";
-import { Transactor } from "./helpers";
-import { formatEther, parseEther } from "@ethersproject/units";
+import { Header, Account, Ramp, Contract, GasGauge } from "./components";
 import AccountDetailsFromBigNumbers from "./helpers/BigNumberToString";
 //import Hints from "./Hints";
 // import { Hints, ExampleUI, Subgraph } from "./views";
@@ -43,14 +40,14 @@ if (DEBUG) console.log("📡 Connecting to Mainnet Ethereum");
 const mainnetProvider = new InfuraProvider("mainnet", INFURA_ID);
 
 // 🏠 Your local provider is usually pointed at your local blockchain
-// const localProviderUrl = "http://" + window.location.hostname + ":8545"; // for xdai: https://dai.poa.network
+const localProviderUrl = "http://" + window.location.hostname + ":8545"; // for xdai: https://dai.poa.network
 // as you deploy to other networks you can set REACT_APP_PROVIDER=https://dai.poa.network in packages/react-app/.env
-// const localProviderUrlFromEnv = process.env.REACT_APP_PROVIDER ? process.env.REACT_APP_PROVIDER : localProviderUrl;
-// if (DEBUG) console.log("🏠 Connecting to provider:", localProviderUrlFromEnv);
-// const localProvider = new JsonRpcProvider(localProviderUrlFromEnv);
-const localProvider = undefined;
+const localProviderUrlFromEnv = process.env.REACT_APP_PROVIDER ? process.env.REACT_APP_PROVIDER : localProviderUrl;
+if (DEBUG) console.log("🏠 Connecting to provider:", localProviderUrlFromEnv);
+const localProvider = new JsonRpcProvider(localProviderUrlFromEnv);
+// const localProvider = undefined;
 
-function App(props) {
+function App() {
   const [injectedProvider, setInjectedProvider] = useState();
   /* 💵 this hook will get the price of ETH from 🦄 Uniswap: */
   const price = useExchangePrice(mainnetProvider); // 1 for xdai
@@ -65,21 +62,19 @@ function App(props) {
   const address = useUserAddress(userProvider);
 
   // The transactor wraps transactions and provides notificiations
-  const tx = Transactor(userProvider, gasPrice);
 
   // Faucet Tx can be used to send funds from the faucet
-  const faucetTx = Transactor(localProvider, gasPrice);
 
   // 🏗 scaffold-eth is full of handy hooks like this one to get your balance:
-  const yourLocalBalance = useBalance(localProvider, address);
-  if (DEBUG) console.log("💵 yourLocalBalance", yourLocalBalance ? formatEther(yourLocalBalance) : "...");
+  // const yourLocalBalance = useBalance(localProvider, address);
+  // if (DEBUG) console.log("💵 yourLocalBalance", yourLocalBalance ? formatEther(yourLocalBalance) : "...");
 
-  // just plug in different 🛰 providers to get your balance on different chains:
-  const yourMainnetBalance = useBalance(mainnetProvider, address);
-  if (DEBUG) console.log("💵 yourMainnetBalance", yourMainnetBalance ? formatEther(yourMainnetBalance) : "...");
+  // // just plug in different 🛰 providers to get your balance on different chains:
+  // const yourMainnetBalance = useBalance(mainnetProvider, address);
+  // if (DEBUG) console.log("💵 yourMainnetBalance", yourMainnetBalance ? formatEther(yourMainnetBalance) : "...");
 
   // Load in your local 📝 contract and read a value from it:
-  const readContracts = useContractLoader(localProvider);
+  const readContracts = useContractLoader(injectedProvider);
   if (DEBUG) console.log("📝 readContracts", readContracts);
 
   // If you want to make 🔐 write transactions to your contracts, use the userProvider:
@@ -107,6 +102,28 @@ function App(props) {
     }
   }, [aaveAccountDataReader]);
 
+  // Listen to events from FlashLoanReceiver
+  // const BorrowMadeEvents = useEventListener(readContracts, "FlashLoanReceiver", "borrowMade", injectedProvider, 1);
+  // const FlashLoanStartedEvents = useEventListener(
+  //   readContracts,
+  //   "FlashLoanReceiver",
+  //   "FlashLoanStarted",
+  //   injectedProvider,
+  //   1,
+  // );
+  // const FlashLoanEndedEvents = useEventListener(
+  //   readContracts,
+  //   "FlashLoanReceiver",
+  //   "FlashLoanEnded",
+  //   injectedProvider,
+  //   1,
+  // );
+  // useEffect(() => {
+  //   console.log("FlashLoanStartedEvents", FlashLoanStartedEvents);
+  //   console.log("BorrowMadeEvents", BorrowMadeEvents);
+  //   console.log("FlashLoanEndedEvents", FlashLoanEndedEvents);
+  // }, [FlashLoanEndedEvents, BorrowMadeEvents, FlashLoanStartedEvents]);
+
   /*
   const addressFromENS = useResolveName(mainnetProvider, "austingriffith.eth");
   console.log("🏷 Resolved austingriffith.eth as:",addressFromENS)
@@ -128,40 +145,13 @@ function App(props) {
     setRoute(window.location.pathname);
   }, [setRoute]);
 
-  // let faucetHint = "";
-  // const [faucetClicked, setFaucetClicked] = useState(false);
-  // if (
-  //   !faucetClicked &&
-  //   localProvider &&
-  //   localProvider.getSigner() &&
-  //   yourLocalBalance &&
-  //   formatEther(yourLocalBalance) <= 0
-  // ) {
-  //   faucetHint = (
-  //     <div style={{ padding: 16 }}>
-  //       <Button
-  //         type={"primary"}
-  //         onClick={() => {
-  //           faucetTx({
-  //             to: address,
-  //             value: parseEther("0.01"),
-  //           });
-  //           setFaucetClicked(true);
-  //         }}
-  //       >
-  //         💰 Grab funds from the faucet ⛽️
-  //       </Button>
-  //     </div>
-  //   );
-  // }
-
   const contracts = userProvider?.getSigner() && (
     <>
       <Contract
         name="FlashLoanReceiver"
         signer={userProvider.getSigner()}
         provider={injectedProvider}
-        // address={address}
+        address={address}
         blockExplorer={blockExplorer}
       />
       {/* <Contract
@@ -254,7 +244,7 @@ function App(props) {
       <div style={{ position: "fixed", textAlign: "right", right: 0, top: 0, padding: 10 }}>
         <Account
           address={address}
-          // localProvider={localProvider}
+          localProvider={localProvider}
           userProvider={userProvider}
           // mainnetProvider={mainnetProvider}
           price={price}
