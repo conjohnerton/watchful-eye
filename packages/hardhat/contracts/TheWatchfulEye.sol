@@ -4,12 +4,17 @@ pragma experimental ABIEncoderV2;
 import "./aave/mocks/tokens/MintableERC20.sol";
 import "./aave/flashloan/base/FlashLoanReceiverBase.sol";
 import "./aave/protocol/configuration/LendingPoolAddressesProvider.sol";
+import { Ownable } from "./aave/dependencies/openzeppelin/contracts/Ownable.sol";
 
-interface I1InchFakeSwap {
-    function doSwap(address fromAddress) external payable;
+interface IFakeDebtToCollateralSwapper {
+    function swapDaiForEthCollateral(address fromAddress, uint256 amount) external;
 }
 
-contract TheWatchfulEye is FlashLoanReceiverBase {
+interface IFakeEthToDaiSwapper {
+    function doSwap() external payable;
+}
+
+contract TheWatchfulEye is FlashLoanReceiverBase, Ownable {
     using SafeMath for uint256;
 
     event borrowMade(address _reserve, uint256 amount , uint256 value);
@@ -25,16 +30,18 @@ contract TheWatchfulEye is FlashLoanReceiverBase {
     }
 
     WatchfulEye watchfulEye;
+    IFakeEthToDaiSwapper private _ethToDai;
+    IFakeDebtToCollateralSwapper private _debtToCollateral;
 
-    constructor(LendingPoolAddressesProvider _provider) FlashLoanReceiverBase(_provider) public {}
-
-    fallback() external payable {
-
+    constructor(LendingPoolAddressesProvider _provider, address fakeEthToDaiSwapper, address fakeDebtToCollateralSwapper) 
+        FlashLoanReceiverBase(_provider) public {
+            _ethToDai = IFakeEthToDaiSwapper(fakeEthToDaiSwapper);
+            _debtToCollateral = IFakeDebtToCollateralSwapper(fakeDebtToCollateralSwapper);
     }
 
-    receive() external payable {
-        
-    }
+    fallback() external payable {}
+
+    receive() external payable {}
 
     // executeOperation is called by Aave's flashloan contract after we call LENDIND_POOL.flashloan
     function executeOperation(
@@ -46,10 +53,13 @@ contract TheWatchfulEye is FlashLoanReceiverBase {
     ) external override returns (bool) {
         emit borrowMade(assets[0], amounts[0] , address(this).balance);
 
-        // Repay loan using flashloan (dai)
-        // Recieve collateral ?? (Link)
-        // Swap collateral and get flashloan asset (dai)
+        // Repay loan using flashloan (dai) Recieve collateral (Eth)
+        _debtToCollateral.swapDaiForEthCollateral(address(this), amounts[0]); // Need to change address(this) to whoever held the position for this flashloan
+        // Does ^^^^ even work? The function would pay this contract's fallback function??
 
+
+        // Swap collateral and get flashloan asset (dai)
+        _ethToDai.doSwap();
         
         // At the end of your logic above, this contract owes
         // the flashloaned amounts + premiums.
@@ -94,6 +104,14 @@ contract TheWatchfulEye is FlashLoanReceiverBase {
 
         (bool success,) = msg.sender.call{ value: address(this).balance }("");
         require(success, "refund failed");
+    }
+
+    function isWatchfulEyeConcernedByWhatItSees() external view returns(bool eyeIsProcessable) {
+        // require(watchfulEye.owner != address(0x0), "The Watchful Eye is currently closed. It sees nothing.");
+
+        // Check prices of the things and return true if the prices are past or at limits.
+
+        return false;
     }
 
     // It's really expensive to go through all the watchfulEyes,which is the type of thing we'd do if we had more time to implement a 'Watchful Eye Protocal', but it's the easiest hack for us to do with the oracle.

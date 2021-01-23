@@ -12,9 +12,8 @@ const main = async () => {
     "0x88757f2f99175387ab4c6a4b3067c77a695b0349",
   ]); // <-- add in constructor args like line 16
 
-  const FakeEthToDaiSwapper = await deploy("FakeEthToDaiSwapper", [
-    "0xC81E6C9C0e51E785AEcbfF971464d1BFc5739E76",
-  ]);
+  const FakeEthToDaiSwapper = await deploy("FakeEthToDaiSwapper", []);
+
   const FakeDebtToCollateralSwapper = await deploy(
     "FakeDebtToCollateralSwapper",
     []
