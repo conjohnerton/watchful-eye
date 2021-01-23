@@ -3,10 +3,10 @@ import { PageHeader } from "antd";
 
 export default function Header() {
   return (
-    <a href="https://github.com/conjohnerton/liqui-bot" target="_blank" rel="noopener noreferrer">
+    <a href="https://github.com/conjohnerton/watchful-eye" target="_blank" rel="noopener noreferrer">
       <PageHeader
-        title="🫖 Liqui-bot"
-        subTitle="a peace-of-mind bot that uses Aave flashloans to self-liquidate in case things go downhill ⛷️"
+        title="🫖 Watchful Eye"
+        subTitle="keeps a watchful eye on your loans... uses Aave flashloans to self-liquidate in case things go downhill ⛷️"
         style={{ cursor: "pointer" }}
       />
     </a>

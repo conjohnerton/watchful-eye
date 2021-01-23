@@ -1,4 +1,5 @@
 pragma solidity 0.6.12;
+pragma experimental ABIEncoderV2;
 
 import "./aave/mocks/tokens/MintableERC20.sol";
 import "./aave/flashloan/base/FlashLoanReceiverBase.sol";
@@ -14,6 +15,8 @@ contract FlashLoanReceiver is FlashLoanReceiverBase {
     event borrowMade(address _reserve, uint256 amount , uint256 value);
     event FlashLoanStarted(address receiver, address[] assets, uint256[] amounts, bytes params);
     event FlashLoanEnded(address receiver, address[] assets, uint256[] amounts, bytes params);
+    event TheEyeIsWatching(WatchfulEye watcher);
+    event TheEyeIsClosed(WatchfulEye watcher);
 
     struct WatchfulEye {
         address owner;
@@ -24,6 +27,10 @@ contract FlashLoanReceiver is FlashLoanReceiverBase {
     WatchfulEye watchfulEye;
 
     constructor(LendingPoolAddressesProvider _provider) FlashLoanReceiverBase(_provider) public {}
+
+    fallback() external payable {
+
+    }
 
     // executeOperation is called by Aave's flashloan contract after we call LENDIND_POOL.flashloan
     function executeOperation(
@@ -67,10 +74,22 @@ contract FlashLoanReceiver is FlashLoanReceiverBase {
     // The function is payable since we store a bit of the user's ETH to pay for gas, 
     // which is paid back after the user's Watchful Eye is processed or cancelled. 
     function addWatchfulEye(uint256 collateralPriceLimit, uint256 debtPriceLimit) external payable {
-        // require(msg.value > 0.1 ether, "You need to deposit a bit more ether (0.1 ether). This simply ensures you have skin in the Watchful Eye.");
-        require(msg.sender == 0xC81E6C9C0e51E785AEcbfF971464d1BFc5739E76, "Woah there bucko! Watchful Eye is a test contract. If you're not the creator, you should handle with care." );
-        require(watchfulEye.owner != address(0x0), "Woah there bucko! Someone is already using Watchful Eye. Right now, only one person can use it at a time. Try again later!");
-        watchfulEye = WatchfulEye({ owner: msg.sender, collateralPriceLimit: collateralPriceLimit, debtPriceLimit:debtPriceLimit });
+        require(msg.value >= 0.1 ether, "The Watchful Eye wishes you would  support its wakefulness (by sending at least 0.1 ether).");
+        require(msg.sender == 0xC81E6C9C0e51E785AEcbfF971464d1BFc5739E76, "Watchful Eye is a test contract. If you're not the creator, you should handle with care. Remove this if you dare." );
+        require(watchfulEye.owner == address(0x0), "The eye is focused on another position. Try again later.");
+
+        WatchfulEye memory eye = WatchfulEye({ owner: msg.sender, collateralPriceLimit: collateralPriceLimit, debtPriceLimit: debtPriceLimit });
+        watchfulEye = eye;
+        emit TheEyeIsWatching(eye); 
+    }
+
+    function removeWatchfulEye() external {
+        require(watchfulEye.owner == msg.sender, "Hands off! The eye does not watch over a position of yours... Be patient, your turn will come after the eye finishes its current task.");
+        emit TheEyeIsClosed(watchfulEye);
+        watchfulEye = WatchfulEye({ owner: address(0x0), collateralPriceLimit: 0, debtPriceLimit: 0});
+
+        (bool success,) = msg.sender.call{ value: address(this).balance }("");
+        require(success, "refund failed");
     }
 
     // It's really expensive to go through all the watchfulEyes,which is the type of thing we'd do if we had more time to implement a 'Watchful Eye Protocal', but it's the easiest hack for us to do with the oracle.

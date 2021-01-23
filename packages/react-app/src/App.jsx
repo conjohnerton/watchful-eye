@@ -1,14 +1,13 @@
 import React, { useCallback, useEffect, useState } from "react";
 import { BrowserRouter, Switch, Route, Link } from "react-router-dom";
 import "antd/dist/antd.css";
-import { InfuraProvider, JsonRpcProvider, Web3Provider } from "@ethersproject/providers";
+import { Web3Provider } from "@ethersproject/providers";
 import "./App.css";
 import { Row, Col, Menu } from "antd";
 import Web3Modal from "web3modal";
 import WalletConnectProvider from "@walletconnect/web3-provider";
 import { useUserAddress } from "eth-hooks";
 import {
-  useExchangePrice,
   useGasPrice,
   useUserProvider,
   useContractLoader,
@@ -16,7 +15,7 @@ import {
   // useEventListener,
   useExternalContractLoader,
 } from "./hooks";
-import { Header, Account, Ramp, Contract, GasGauge } from "./components";
+import { Header, Account, Contract, GasGauge } from "./components";
 import AccountDetailsFromBigNumbers from "./helpers/BigNumberToString";
 //import Hints from "./Hints";
 // import { Hints, ExampleUI, Subgraph } from "./views";
@@ -35,27 +34,25 @@ const DEBUG = false;
 const blockExplorer = "https://etherscan.io/"; // for xdai: "https://blockscout.com/poa/xdai/"
 
 // 🛰 providers
-if (DEBUG) console.log("📡 Connecting to Mainnet Ethereum");
+// if (DEBUG) console.log("📡 Connecting to Mainnet Ethereum");
 //const mainnetProvider = getDefaultProvider("mainnet", { infura: INFURA_ID, etherscan: ETHERSCAN_KEY, quorum: 1 });
-const mainnetProvider = new InfuraProvider("mainnet", INFURA_ID);
+// const mainnetProvider = new InfuraProvider("mainnet", INFURA_ID);
 
 // 🏠 Your local provider is usually pointed at your local blockchain
-const localProviderUrl = "http://" + window.location.hostname + ":8545"; // for xdai: https://dai.poa.network
-// as you deploy to other networks you can set REACT_APP_PROVIDER=https://dai.poa.network in packages/react-app/.env
-const localProviderUrlFromEnv = process.env.REACT_APP_PROVIDER ? process.env.REACT_APP_PROVIDER : localProviderUrl;
-if (DEBUG) console.log("🏠 Connecting to provider:", localProviderUrlFromEnv);
-const localProvider = new JsonRpcProvider(localProviderUrlFromEnv);
-// const localProvider = undefined;
+// const localProviderUrl = "http://" + window.location.hostname + ":8545"; // for xdai: https://dai.poa.network
+// // as you deploy to other networks you can set REACT_APP_PROVIDER=https://dai.poa.network in packages/react-app/.env
+// const localProviderUrlFromEnv = process.env.REACT_APP_PROVIDER ? process.env.REACT_APP_PROVIDER : localProviderUrl;
+// if (DEBUG) console.log("🏠 Connecting to provider:", localProviderUrlFromEnv);
+// const localProvider = new JsonRpcProvider(localProviderUrlFromEnv);
+const localProvider = undefined;
 
 function App() {
   const [injectedProvider, setInjectedProvider] = useState();
   /* 💵 this hook will get the price of ETH from 🦄 Uniswap: */
-  const price = useExchangePrice(mainnetProvider); // 1 for xdai
+  // const price = useExchangePrice(mainnetProvider); // 1 for xdai
 
   /* 🔥 this hook will get the price of Gas from ⛽️ EtherGasStation */
   const gasPrice = useGasPrice("fast"); // 1000000000 for xdai
-
-  // For more hooks, check out 🔗eth-hooks at: https://www.npmjs.com/package/eth-hooks
 
   // Use your injected provider from 🦊 Metamask or if you don't have it then instantly generate a 🔥 burner wallet.
   const userProvider = useUserProvider(injectedProvider, localProvider);
@@ -67,11 +64,6 @@ function App() {
 
   // 🏗 scaffold-eth is full of handy hooks like this one to get your balance:
   // const yourLocalBalance = useBalance(localProvider, address);
-  // if (DEBUG) console.log("💵 yourLocalBalance", yourLocalBalance ? formatEther(yourLocalBalance) : "...");
-
-  // // just plug in different 🛰 providers to get your balance on different chains:
-  // const yourMainnetBalance = useBalance(mainnetProvider, address);
-  // if (DEBUG) console.log("💵 yourMainnetBalance", yourMainnetBalance ? formatEther(yourMainnetBalance) : "...");
 
   // Load in your local 📝 contract and read a value from it:
   const readContracts = useContractLoader(injectedProvider);
@@ -102,6 +94,8 @@ function App() {
     }
   }, [aaveAccountDataReader]);
 
+  // Ask WatchfulEye if it's open
+
   // Listen to events from FlashLoanReceiver
   // const BorrowMadeEvents = useEventListener(readContracts, "FlashLoanReceiver", "borrowMade", injectedProvider, 1);
   // const FlashLoanStartedEvents = useEventListener(
@@ -124,9 +118,6 @@ function App() {
   //   console.log("FlashLoanEndedEvents", FlashLoanEndedEvents);
   // }, [FlashLoanEndedEvents, BorrowMadeEvents, FlashLoanStartedEvents]);
 
-  // Ask WatchfulEye if it's open
-  const isWatchfulEyeOpen = useContractReader(readContracts, "FlashLoanReceiver", "isWatchfulEyeOpen");
-  
   /*
   const addressFromENS = useResolveName(mainnetProvider, "austingriffith.eth");
   console.log("🏷 Resolved austingriffith.eth as:",addressFromENS)
@@ -148,18 +139,19 @@ function App() {
     setRoute(window.location.pathname);
   }, [setRoute]);
 
-  const contracts = userProvider?.getSigner() && (
+  const signer = userProvider?.getSigner();
+  const contracts = signer && (
     <>
       <Contract
         name="FlashLoanReceiver"
-        signer={userProvider.getSigner()}
+        signer={signer}
         provider={injectedProvider}
         address={address}
         blockExplorer={blockExplorer}
       />
       <Contract
         name="SETUP1InchFakeSwap"
-        signer={userProvider.getSigner()}
+        signer={signer}
         provider={injectedProvider}
         address={address}
         blockExplorer={blockExplorer}
@@ -170,7 +162,6 @@ function App() {
   return (
     <div className="App">
       <Header />
-
       <BrowserRouter>
         <Menu style={{ textAlign: "center" }} selectedKeys={[route]} mode="horizontal">
           <Menu.Item key="/">
@@ -241,7 +232,6 @@ function App() {
           </Route> */}
         </Switch>
       </BrowserRouter>
-
       {/* 👨‍💼 Your account is in the top right with a wallet at connect options */}
       <div style={{ position: "fixed", textAlign: "right", right: 0, top: 0, padding: 10 }}>
         <Account
@@ -249,20 +239,19 @@ function App() {
           localProvider={localProvider}
           userProvider={userProvider}
           // mainnetProvider={mainnetProvider}
-          price={price}
+          // price={price}
           web3Modal={web3Modal}
           loadWeb3Modal={loadWeb3Modal}
           logoutOfWeb3Modal={logoutOfWeb3Modal}
           blockExplorer={blockExplorer}
         />
       </div>
-
       {/* 🗺 Extra UI like gas price, eth price, faucet, and support: */}
       <div style={{ position: "fixed", textAlign: "left", left: 0, bottom: 20, padding: 10 }}>
         <Row align="middle" gutter={[0, 4]}>
-          <Col span={8}>
+          {/* <Col span={8}>
             <Ramp price={price} address={address} />
-          </Col>
+          </Col> */}
 
           <Col span={3} offset={6} style={{ textAlign: "center", opacity: 0.8 }}>
             <GasGauge gasPrice={gasPrice} />
@@ -277,7 +266,7 @@ function App() {
   Web3 modal helps us "connect" external wallets:
 */
 const web3Modal = new Web3Modal({
-  // network: "mainnet", // optional
+  network: "kovan", // optional
   cacheProvider: true, // optional
   providerOptions: {
     walletconnect: {

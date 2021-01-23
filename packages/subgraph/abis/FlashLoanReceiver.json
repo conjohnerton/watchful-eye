@@ -76,6 +76,66 @@
     "anonymous": false,
     "inputs": [
       {
+        "components": [
+          {
+            "internalType": "address",
+            "name": "owner",
+            "type": "address"
+          },
+          {
+            "internalType": "uint256",
+            "name": "collateralPriceLimit",
+            "type": "uint256"
+          },
+          {
+            "internalType": "uint256",
+            "name": "debtPriceLimit",
+            "type": "uint256"
+          }
+        ],
+        "indexed": false,
+        "internalType": "struct FlashLoanReceiver.WatchfulEye",
+        "name": "watcher",
+        "type": "tuple"
+      }
+    ],
+    "name": "TheEyeIsClosed",
+    "type": "event"
+  },
+  {
+    "anonymous": false,
+    "inputs": [
+      {
+        "components": [
+          {
+            "internalType": "address",
+            "name": "owner",
+            "type": "address"
+          },
+          {
+            "internalType": "uint256",
+            "name": "collateralPriceLimit",
+            "type": "uint256"
+          },
+          {
+            "internalType": "uint256",
+            "name": "debtPriceLimit",
+            "type": "uint256"
+          }
+        ],
+        "indexed": false,
+        "internalType": "struct FlashLoanReceiver.WatchfulEye",
+        "name": "watcher",
+        "type": "tuple"
+      }
+    ],
+    "name": "TheEyeIsWatching",
+    "type": "event"
+  },
+  {
+    "anonymous": false,
+    "inputs": [
+      {
         "indexed": false,
         "internalType": "address",
         "name": "_reserve",
@@ -196,6 +256,13 @@
   {
     "inputs": [],
     "name": "makeFlashLoan",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [],
+    "name": "removeWatchfulEye",
     "outputs": [],
     "stateMutability": "nonpayable",
     "type": "function"
