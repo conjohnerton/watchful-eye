@@ -9,7 +9,7 @@ interface I1InchFakeSwap {
     function doSwap(address fromAddress) external payable;
 }
 
-contract FlashLoanReceiver is FlashLoanReceiverBase {
+contract TheWatchfulEye is FlashLoanReceiverBase {
     using SafeMath for uint256;
 
     event borrowMade(address _reserve, uint256 amount , uint256 value);
@@ -30,6 +30,10 @@ contract FlashLoanReceiver is FlashLoanReceiverBase {
 
     fallback() external payable {
 
+    }
+
+    receive() external payable {
+        
     }
 
     // executeOperation is called by Aave's flashloan contract after we call LENDIND_POOL.flashloan

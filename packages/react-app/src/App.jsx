@@ -94,8 +94,6 @@ function App() {
     }
   }, [aaveAccountDataReader]);
 
-  // Ask WatchfulEye if it's open
-
   // Listen to events from FlashLoanReceiver
   // const BorrowMadeEvents = useEventListener(readContracts, "FlashLoanReceiver", "borrowMade", injectedProvider, 1);
   // const FlashLoanStartedEvents = useEventListener(
@@ -143,14 +141,14 @@ function App() {
   const contracts = signer && (
     <>
       <Contract
-        name="FlashLoanReceiver"
+        name="TheWatchfulEye"
         signer={signer}
         provider={injectedProvider}
         address={address}
         blockExplorer={blockExplorer}
       />
       <Contract
-        name="SETUP1InchFakeSwap"
+        name="FakeEthToDaiSwapper"
         signer={signer}
         provider={injectedProvider}
         address={address}
