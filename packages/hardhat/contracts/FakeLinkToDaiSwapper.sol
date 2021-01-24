@@ -4,21 +4,14 @@ import "./aave/dependencies/openzeppelin/contracts/IERC20.sol";
 import { SafeMath } from './aave/dependencies/openzeppelin/contracts/SafeMath.sol';
 import { Ownable } from "./aave/dependencies/openzeppelin/contracts/Ownable.sol";
 
-contract FakeEthToDaiSwapper is Ownable {
+contract FakeLinkToDaiSwapper is Ownable {
     using SafeMath for uint256;
 
     event SwapDone(address _reserve, uint256 amount , uint256 value);
 
-    // address private owner;
-
-    // constructor(address _owner) public {
-    //     owner = _owner;
-    // }
-
     receive() external payable {}
 
-    function doSwap() external payable {
-        require(msg.value > 0.01 ether, "Woah buddy... Try sending a bit less ETH. This is a fake swap anyways, you don't really need to drain our pockets on the test-net...");
+    function doSwap() external {
 
         // Check price of eth and swap number of dai based on it.
     }

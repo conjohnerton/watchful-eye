@@ -2,8 +2,10 @@ import React, { useCallback, useEffect, useState } from "react";
 import { BrowserRouter, Switch, Route, Link } from "react-router-dom";
 import "antd/dist/antd.css";
 import { Web3Provider } from "@ethersproject/providers";
+import { Contract as ethersContract } from '@ethersproject/contracts';
+import { parseUnits } from '@ethersproject/units'
 import "./App.css";
-import { Row, Col, Menu } from "antd";
+import { Row, Col, Menu, Button, Form, Input, Card } from "antd";
 import Web3Modal from "web3modal";
 import WalletConnectProvider from "@walletconnect/web3-provider";
 import { useUserAddress } from "eth-hooks";
@@ -21,11 +23,14 @@ import AccountDetailsFromBigNumbers from "./helpers/BigNumberToString";
 // import { Hints, ExampleUI, Subgraph } from "./views";
 import UserInfo from "./components/UserInfo";
 import {
+  ERC20_ABI,
   INFURA_ID,
   LENDING_POOL_ABI,
   LENDING_POOL_ADDRESS_PROVIDER_ABI,
   LENDING_POOL_ADDRESS_PROVIDER_ADDRESS,
+  LINK_ADDRESS,
 } from "./constants";
+import { useForm } from "antd/lib/form/Form";
 
 // 😬 Sorry for all the console logging 🤡
 const DEBUG = false;
@@ -138,22 +143,73 @@ function App() {
   }, [setRoute]);
 
   const signer = userProvider?.getSigner();
+
+  const [collateralApprovalForm] = useForm();
+  async function onFinish() {
+    const erc20_rw = new ethersContract(LINK_ADDRESS, ERC20_ABI, signer);
+    await erc20_rw.approve(readContracts["TheWatchfulEye"].address, parseUnits(collateralApprovalForm.getFieldValue("amount")));
+  }
+
+  async function doLoan() {
+    await writeContracts["TheWatchfulEye"].makeFlashLoan();
+  }
+
   const contracts = signer && (
     <>
-      <Contract
+      {/* Approve collateral interaction */}
+      <div style={{ margin: "auto", width: "70vw" }}>
+        <Card
+          title="Approve The Watchful Eye's interactions with your funds"
+          size="large"
+          style={{ marginTop: 25, width: "100%" }}
+        >
+          <Form form={collateralApprovalForm} onFinish={onFinish}>
+            {/* <Form.Item label="Collateral Amount" /> */}
+            <Form.Item
+              label="Collateral Amount"
+              name="amount"
+              rules={[{ required: true, message: 'Please input a number!' }]}
+            >
+              <Input />
+            </Form.Item>
+            <Form.Item>
+              <Button type="primary" htmlType="submit">Approve!</Button>
+            </Form.Item>
+          </Form>
+        </Card>
+      </div>
+      
+      {/* Make flashloan */}
+      <div style={{ margin: "auto", width: "70vw" }}>
+        <Card
+          title="Do the loan"
+          size="large"
+          style={{ marginTop: 25, width: "100%" }}
+        >
+          <Form onFinish={doLoan}>
+            <Form.Item>
+              <Button type="primary" htmlType="submit">Send!</Button>
+            </Form.Item>
+          </Form>
+        </Card>
+      </div>
+      {/* <Contract
         name="TheWatchfulEye"
         signer={signer}
         provider={injectedProvider}
         address={address}
         blockExplorer={blockExplorer}
-      />
-      <Contract
-        name="FakeEthToDaiSwapper"
+      /> */}
+      {/* <Contract 
+        name="Link. Use This To Approve "
+      /> */}
+      {/* <Contract
+        name="Fake"
         signer={signer}
         provider={injectedProvider}
         address={address}
         blockExplorer={blockExplorer}
-      />
+      /> */}
     </>
   );
 

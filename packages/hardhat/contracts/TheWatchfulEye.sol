@@ -4,24 +4,41 @@ pragma experimental ABIEncoderV2;
 import "./aave/mocks/tokens/MintableERC20.sol";
 import "./aave/flashloan/base/FlashLoanReceiverBase.sol";
 import "./aave/protocol/configuration/LendingPoolAddressesProvider.sol";
-import { Ownable } from "./aave/dependencies/openzeppelin/contracts/Ownable.sol";
+import {Ownable} from "./aave/dependencies/openzeppelin/contracts/Ownable.sol";
 
 interface IFakeDebtToCollateralSwapper {
-    function swapDaiForEthCollateral(address fromAddress, uint256 amount) external;
+    function repay(address onBehalfOf, uint256 amount) external;
 }
 
-interface IFakeEthToDaiSwapper {
+interface IFakeLinkToDaiSwapper {
     function doSwap() external payable;
 }
+
+// 0xad5ce863ae3e4e9394ab43d4ba0d80f419f61789 Link Test Address
 
 contract TheWatchfulEye is FlashLoanReceiverBase, Ownable {
     using SafeMath for uint256;
 
-    event borrowMade(address _reserve, uint256 amount , uint256 value);
-    event FlashLoanStarted(address receiver, address[] assets, uint256[] amounts, bytes params);
-    event FlashLoanEnded(address receiver, address[] assets, uint256[] amounts, bytes params);
     event TheEyeIsWatching(WatchfulEye watcher);
     event TheEyeIsClosed(WatchfulEye watcher);
+    event borrowMade(
+        address _reserve,
+        uint256 amount,
+        uint256 value,
+        address ownerOfDebt
+    );
+    event FlashLoanStarted(
+        address receiver,
+        address[] assets,
+        uint256[] amounts,
+        bytes params
+    );
+    event FlashLoanEnded(
+        address receiver,
+        address[] assets,
+        uint256[] amounts,
+        bytes params
+    );
 
     struct WatchfulEye {
         address owner;
@@ -30,18 +47,30 @@ contract TheWatchfulEye is FlashLoanReceiverBase, Ownable {
     }
 
     WatchfulEye watchfulEye;
-    IFakeEthToDaiSwapper private _ethToDai;
+    IFakeLinkToDaiSwapper private _linkToDai;
     IFakeDebtToCollateralSwapper private _debtToCollateral;
+    IERC20 linkToken = IERC20(0xAD5ce863aE3E4E9394Ab43d4ba0D80f419F61789);
+    IERC20 daiToken = IERC20(0xFf795577d9AC8bD7D90Ee22b6C1703490b6512FD);
 
-    constructor(LendingPoolAddressesProvider _provider, address fakeEthToDaiSwapper, address fakeDebtToCollateralSwapper) 
-        FlashLoanReceiverBase(_provider) public {
-            _ethToDai = IFakeEthToDaiSwapper(fakeEthToDaiSwapper);
-            _debtToCollateral = IFakeDebtToCollateralSwapper(fakeDebtToCollateralSwapper);
+    constructor(
+        LendingPoolAddressesProvider _provider,
+        address fakeEthToDaiSwapper,
+        address fakeDebtToCollateralSwapper
+    ) public FlashLoanReceiverBase(_provider) {
+        _linkToDai = IFakeLinkToDaiSwapper(fakeEthToDaiSwapper);
+        _debtToCollateral = IFakeDebtToCollateralSwapper(
+            fakeDebtToCollateralSwapper
+        );
     }
 
     fallback() external payable {}
 
     receive() external payable {}
+
+    function repayDebt(uint256[] calldata amounts, address onBehalfOf) internal {
+        daiToken.approve(address(_debtToCollateral), amounts[0]);
+        _debtToCollateral.repay(onBehalfOf, amounts[0]);
+    }
 
     // executeOperation is called by Aave's flashloan contract after we call LENDIND_POOL.flashloan
     function executeOperation(
@@ -51,28 +80,33 @@ contract TheWatchfulEye is FlashLoanReceiverBase, Ownable {
         address initiator,
         bytes calldata params
     ) external override returns (bool) {
-        emit borrowMade(assets[0], amounts[0] , address(this).balance);
+        address ownerOfDebt = abi.decode(params, (address));
+        emit borrowMade(
+            assets[0],
+            amounts[0],
+            address(this).balance,
+            ownerOfDebt
+        );
 
         // Repay loan using flashloan (dai) Recieve collateral (Eth)
-        _debtToCollateral.swapDaiForEthCollateral(address(this), amounts[0]); // Need to change address(this) to whoever held the position for this flashloan
-        // Does ^^^^ even work? The function would pay this contract's fallback function??
-
-
-        // Swap collateral and get flashloan asset (dai)
-        _ethToDai.doSwap();
+        repayDebt(amounts, ownerOfDebt);
         
+
+        // transferFrom u
+        // Swap collateral and get flashloan asset (dai)
+        _linkToDai.doSwap();
+
         // At the end of your logic above, this contract owes
         // the flashloaned amounts + premiums.
         // Therefore ensure your contract has enough to repay
         // these amounts.
-        
-        
+
         // Approve the LendingPool contract allowance to *pull* the owed amount
-        for (uint i = 0; i < assets.length; i++) {
-            uint amountOwing = amounts[i].add(premiums[i]);
+        for (uint256 i = 0; i < assets.length; i++) {
+            uint256 amountOwing = amounts[i].add(premiums[i]);
             IERC20(assets[i]).approve(address(LENDING_POOL), amountOwing);
         }
-        
+
         return true;
     }
 
@@ -85,28 +119,57 @@ contract TheWatchfulEye is FlashLoanReceiverBase, Ownable {
     }
 
     // Adds user debt and stop loss to state.
-    // The function is payable since we store a bit of the user's ETH to pay for gas, 
-    // which is paid back after the user's Watchful Eye is processed or cancelled. 
-    function addWatchfulEye(uint256 collateralPriceLimit, uint256 debtPriceLimit) external payable {
-        require(msg.value >= 0.1 ether, "The Watchful Eye wishes you would  support its wakefulness (by sending at least 0.1 ether).");
-        require(msg.sender == 0xC81E6C9C0e51E785AEcbfF971464d1BFc5739E76, "Watchful Eye is a test contract. If you're not the creator, you should handle with care. Remove this if you dare." );
-        require(watchfulEye.owner == address(0x0), "The eye is focused on another position. Try again later.");
+    // The function is payable since we store a bit of the user's ETH to pay for gas,
+    // which is paid back after the user's Watchful Eye is processed or cancelled.
+    function addWatchfulEye(
+        uint256 collateralPriceLimit,
+        uint256 debtPriceLimit
+    ) external payable {
+        require(
+            msg.value >= 0.1 ether,
+            "The Watchful Eye wishes you would  support its wakefulness (by sending at least 0.1 ether)."
+        );
+        require(
+            msg.sender == 0xC81E6C9C0e51E785AEcbfF971464d1BFc5739E76,
+            "Watchful Eye is a test contract. If you're not the creator, you should handle with care. Remove this if you dare."
+        );
+        require(
+            watchfulEye.owner == address(0x0),
+            "The eye is focused on another position. Try again later."
+        );
 
-        WatchfulEye memory eye = WatchfulEye({ owner: msg.sender, collateralPriceLimit: collateralPriceLimit, debtPriceLimit: debtPriceLimit });
+        WatchfulEye memory eye =
+            WatchfulEye({
+                owner: msg.sender,
+                collateralPriceLimit: collateralPriceLimit,
+                debtPriceLimit: debtPriceLimit
+            });
         watchfulEye = eye;
-        emit TheEyeIsWatching(eye); 
+        emit TheEyeIsWatching(eye);
     }
 
     function removeWatchfulEye() external {
-        require(watchfulEye.owner == msg.sender, "Hands off! The eye does not watch over a position of yours... Be patient, your turn will come after the eye finishes its current task.");
+        require(
+            watchfulEye.owner == msg.sender,
+            "Hands off! The eye does not watch over a position of yours... Be patient, your turn will come after the eye finishes its current task."
+        );
         emit TheEyeIsClosed(watchfulEye);
-        watchfulEye = WatchfulEye({ owner: address(0x0), collateralPriceLimit: 0, debtPriceLimit: 0});
+        watchfulEye = WatchfulEye({
+            owner: address(0x0),
+            collateralPriceLimit: 0,
+            debtPriceLimit: 0
+        });
 
-        (bool success,) = msg.sender.call{ value: address(this).balance }("");
+        (bool success, ) = msg.sender.call{value: address(this).balance}("");
         require(success, "refund failed");
     }
 
-    function isWatchfulEyeConcernedByWhatItSees() external view returns(bool eyeIsProcessable) {
+    // The oracle calls this to see if it needs to call makeFlashLoan
+    function isWatchfulEyeConcernedByWhatItSees()
+        external
+        view
+        returns (bool eyeIsProcessable)
+    {
         // require(watchfulEye.owner != address(0x0), "The Watchful Eye is currently closed. It sees nothing.");
 
         // Check prices of the things and return true if the prices are past or at limits.
@@ -115,11 +178,11 @@ contract TheWatchfulEye is FlashLoanReceiverBase, Ownable {
     }
 
     // It's really expensive to go through all the watchfulEyes,which is the type of thing we'd do if we had more time to implement a 'Watchful Eye Protocal', but it's the easiest hack for us to do with the oracle.
-    // To optimize, we could potentially have a `findWatchfulEye`, which would be called by an oracle. `findWatchfulEye` could return 
-    // the watchfulEye that needs to be processed. The oracle would then be able to use that info in a call to `makeFlashLoan`. This might 
+    // To optimize, we could potentially have a `findWatchfulEye`, which would be called by an oracle. `findWatchfulEye` could return
+    // the watchfulEye that needs to be processed. The oracle would then be able to use that info in a call to `makeFlashLoan`. This might
     // split each makeFlashLoan into a totally separate transactions. This could potentially cause some problems with liquidation occuring too late.
     function makeFlashLoan() public {
-        // Compare the current collateral price and debt price to the limits inside 
+        // Compare the current collateral price and debt price to the limits inside
         address receiverAddress = address(this);
 
         address[] memory assets = new address[](1);
@@ -133,7 +196,7 @@ contract TheWatchfulEye is FlashLoanReceiverBase, Ownable {
         modes[0] = 0;
 
         address onBehalfOf = msg.sender;
-        bytes memory params = "";
+        bytes memory params = abi.encode(msg.sender);
         uint16 referralCode = 0;
 
         emit FlashLoanStarted(receiverAddress, assets, amounts, params);

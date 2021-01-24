@@ -5,6 +5,16 @@
         "internalType": "contract LendingPoolAddressesProvider",
         "name": "_provider",
         "type": "address"
+      },
+      {
+        "internalType": "address",
+        "name": "fakeEthToDaiSwapper",
+        "type": "address"
+      },
+      {
+        "internalType": "address",
+        "name": "fakeDebtToCollateralSwapper",
+        "type": "address"
       }
     ],
     "stateMutability": "nonpayable",
@@ -171,6 +181,12 @@
         "internalType": "uint256",
         "name": "value",
         "type": "uint256"
+      },
+      {
+        "indexed": false,
+        "internalType": "address",
+        "name": "ownerOfDebt",
+        "type": "address"
       }
     ],
     "name": "borrowMade",

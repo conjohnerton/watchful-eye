@@ -8,16 +8,18 @@ const R = require("ramda");
 const main = async () => {
   console.log("\n\n 📡 Deploying...\n");
 
-  const WatchfulEyeContract = await deploy("TheWatchfulEye", [
-    "0x88757f2f99175387ab4c6a4b3067c77a695b0349",
-  ]); // <-- add in constructor args like line 16
-
-  const FakeEthToDaiSwapper = await deploy("FakeEthToDaiSwapper", []);
+  const FakeEthToDaiSwapper = await deploy("FakeLinkToDaiSwapper", []);
 
   const FakeDebtToCollateralSwapper = await deploy(
     "FakeDebtToCollateralSwapper",
     []
   );
+
+  const WatchfulEyeContract = await deploy("TheWatchfulEye", [
+    "0x88757f2f99175387ab4c6a4b3067c77a695b0349",
+    FakeEthToDaiSwapper.address,
+    FakeDebtToCollateralSwapper.address
+  ]); // <-- add in constructor args like line 16
 
   // const exampleToken = await deploy("ExampleToken")
   // const examplePriceOracle = await deploy("ExamplePriceOracle")
