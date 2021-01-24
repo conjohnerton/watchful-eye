@@ -1,7 +1,7 @@
 import React, { useCallback, useEffect, useState } from "react";
 import { BrowserRouter, Switch, Route, Link } from "react-router-dom";
 import "antd/dist/antd.css";
-import { Web3Provider } from "@ethersproject/providers";
+import { JsonRpcProvider, Web3Provider } from "@ethersproject/providers";
 import { Contract as ethersContract } from '@ethersproject/contracts';
 import { parseUnits } from '@ethersproject/units'
 import "./App.css";
@@ -33,7 +33,7 @@ import {
 import { useForm } from "antd/lib/form/Form";
 
 // 😬 Sorry for all the console logging 🤡
-const DEBUG = false;
+const DEBUG = true;
 
 // 🔭 block explorer URL
 const blockExplorer = "https://etherscan.io/"; // for xdai: "https://blockscout.com/poa/xdai/"
@@ -44,12 +44,11 @@ const blockExplorer = "https://etherscan.io/"; // for xdai: "https://blockscout.
 // const mainnetProvider = new InfuraProvider("mainnet", INFURA_ID);
 
 // 🏠 Your local provider is usually pointed at your local blockchain
-// const localProviderUrl = "http://" + window.location.hostname + ":8545"; // for xdai: https://dai.poa.network
+const localProviderUrl = "http://" + window.location.hostname + ":8545"; // for xdai: https://dai.poa.network
 // // as you deploy to other networks you can set REACT_APP_PROVIDER=https://dai.poa.network in packages/react-app/.env
-// const localProviderUrlFromEnv = process.env.REACT_APP_PROVIDER ? process.env.REACT_APP_PROVIDER : localProviderUrl;
-// if (DEBUG) console.log("🏠 Connecting to provider:", localProviderUrlFromEnv);
-// const localProvider = new JsonRpcProvider(localProviderUrlFromEnv);
-const localProvider = undefined;
+const localProviderUrlFromEnv = process.env.REACT_APP_PROVIDER ? process.env.REACT_APP_PROVIDER : localProviderUrl;
+if (DEBUG) console.log("🏠 Connecting to provider:", localProviderUrlFromEnv);
+const localProvider = new JsonRpcProvider(localProviderUrlFromEnv);
 
 function App() {
   const [injectedProvider, setInjectedProvider] = useState();
@@ -71,7 +70,7 @@ function App() {
   // const yourLocalBalance = useBalance(localProvider, address);
 
   // Load in your local 📝 contract and read a value from it:
-  const readContracts = useContractLoader(injectedProvider);
+  const readContracts = useContractLoader(localProvider);
   if (DEBUG) console.log("📝 readContracts", readContracts);
 
   // If you want to make 🔐 write transactions to your contracts, use the userProvider:
@@ -80,7 +79,7 @@ function App() {
 
   // Gets Aave lending pool and user account info
   const LendingPoolAddressesProvider = useExternalContractLoader(
-    injectedProvider,
+    localProvider,
     LENDING_POOL_ADDRESS_PROVIDER_ADDRESS,
     LENDING_POOL_ADDRESS_PROVIDER_ABI,
   );
@@ -90,7 +89,7 @@ function App() {
     "getLendingPool",
     [],
   );
-  const LendingPool = useExternalContractLoader(injectedProvider, LendingPoolAddress, LENDING_POOL_ABI);
+  const LendingPool = useExternalContractLoader(localProvider, LendingPoolAddress, LENDING_POOL_ABI);
   const aaveAccountDataReader = useContractReader({ LendingPool }, "LendingPool", "getUserAccountData", [address]);
   const [accountData, setAccountData] = useState(null);
   useEffect(() => {
@@ -142,7 +141,7 @@ function App() {
     setRoute(window.location.pathname);
   }, [setRoute]);
 
-  const signer = userProvider?.getSigner();
+  const signer = userProvider.getSigner();
 
   const [collateralApprovalForm] = useForm();
   async function onFinish() {
@@ -151,7 +150,7 @@ function App() {
   }
 
   async function doLoan() {
-    await writeContracts["TheWatchfulEye"].makeFlashLoan();
+    console.log(await writeContracts["TheWatchfulEye"].isWatchfulEyeConcernedByWhatItSees());
   }
 
   const contracts = signer && (
@@ -193,13 +192,13 @@ function App() {
           </Form>
         </Card>
       </div>
-      {/* <Contract
+      <Contract
         name="TheWatchfulEye"
         signer={signer}
-        provider={injectedProvider}
+        provider={localProvider}
         address={address}
         blockExplorer={blockExplorer}
-      /> */}
+      />
       {/* <Contract 
         name="Link. Use This To Approve "
       /> */}
