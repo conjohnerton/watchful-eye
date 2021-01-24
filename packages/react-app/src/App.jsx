@@ -11,8 +11,10 @@ import WalletConnectProvider from "@walletconnect/web3-provider";
 import { useUserAddress } from "eth-hooks";
 import { useExchangePrice, useGasPrice, useUserProvider, useContractLoader, useBalance } from "./hooks";
 import { Header, Account, Ramp, Contract, GasGauge } from "./components";
-import { INFURA_ID, ERC20_ABI, LINK_ADDRESS } from "./constants";
+import { INFURA_ID, ERC20_ABI, LINK_ADDRESS, DAI_ADDRESS } from "./constants";
 import { useForm } from "antd/lib/form/Form";
+import { Transactor } from "./helpers";
+require("dotenv").config();
 
 // 😬 Sorry for all the console logging 🤡
 const DEBUG = false;
@@ -31,8 +33,8 @@ console.log("window.location.hostname", window.location.hostname);
 const localProviderUrl = "http://" + window.location.hostname + ":8545"; // for xdai: https://dai.poa.network
 // as you deploy to other networks you can set REACT_APP_PROVIDER=https://dai.poa.network in packages/react-app/.env
 const localProviderUrlFromEnv = process.env.REACT_APP_PROVIDER ? process.env.REACT_APP_PROVIDER : localProviderUrl;
-if (DEBUG) console.log("🏠 Connecting to provider:", localProviderUrlFromEnv);
-const localProvider = new JsonRpcProvider(localProviderUrlFromEnv);
+if (DEBUG) console.log("🏠 Connecting to provider:", process.env.REACT_APP_PROVIDER);
+const localProvider = new JsonRpcProvider("https://kovan.infura.io/v3/a32e8add5ecf4916b841d38d66f47a4d");
 
 function App() {
   const [injectedProvider, setInjectedProvider] = useState();
@@ -45,6 +47,8 @@ function App() {
   // Use your injected provider from 🦊 Metamask or if you don't have it then instantly generate a 🔥 burner wallet.
   const userProvider = useUserProvider(injectedProvider, localProvider);
   const address = useUserAddress(userProvider);
+
+  const tx = Transactor(injectedProvider, gasPrice);
 
   // 🏗 scaffold-eth is full of handy hooks like this one to get your balance:
   const userBalance = useBalance(userProvider, address);
@@ -88,20 +92,31 @@ function App() {
   // }, [aaveAccountDataReader]);
 
   const [collateralApprovalForm] = useForm();
-  async function onFinish() {
-    const erc20_rw = new ethersContract(LINK_ADDRESS, ERC20_ABI, userProvider.getSigner());
-    await erc20_rw.approve(
-      readContracts["TheWatchfulEye"].address,
-      parseUnits(collateralApprovalForm.getFieldValue("amount")),
+  const [sendDaiForm] = useForm();
+  async function approveLink() {
+    const link_rw = new ethersContract(LINK_ADDRESS, ERC20_ABI, userProvider.getSigner());
+    tx(
+      link_rw.approve(
+        readContracts["TheWatchfulEye"].address,
+        parseUnits(collateralApprovalForm.getFieldValue("amount")),
+      ),
     );
   }
 
+  async function approveDai() {
+    const dai_rw = new ethersContract(DAI_ADDRESS, ERC20_ABI, userProvider.getSigner());
+    await tx(dai_rw.approve(writeContracts["TheWatchfulEye"].address, parseUnits(sendDaiForm.getFieldValue("amount"))));
+    await tx(writeContracts.TheWatchfulEye.giveDai(parseUnits(sendDaiForm.getFieldValue("amount"))));
+  }
+
   async function doLoan() {
-    console.log("Checking the Eye's concern levels. 👁️");
-    if (!(await writeContracts.TheWatchfulEye.isWatchfulEyeConcernedByWhatItSees())) {
-      console.log("The Watchful Eye 👁️ is concerned... The Eye 👁️ will fix it.");
-      console.log(await writeContracts.TheWatchfulEye.makeFlashLoan());
-    }
+    try {
+      console.log("Checking the Eye's concern levels. 👁️");
+      if (!(await writeContracts.TheWatchfulEye.isWatchfulEyeConcernedByWhatItSees())) {
+        console.log("The Watchful Eye 👁️ is concerned... The Eye 👁️ will fix it.");
+        tx(writeContracts.TheWatchfulEye.makeFlashLoan());
+      }
+    } catch (err) {}
   }
 
   return (
@@ -142,10 +157,33 @@ function App() {
                   size="large"
                   style={{ marginTop: 25, width: "100%" }}
                 >
-                  <Form form={collateralApprovalForm} onFinish={onFinish}>
+                  <Form form={collateralApprovalForm} onFinish={approveLink}>
                     {/* <Form.Item label="Collateral Amount" /> */}
                     <Form.Item
                       label="Collateral Amount"
+                      name="amount"
+                      rules={[{ required: true, message: "Please input a number!" }]}
+                    >
+                      <Input />
+                    </Form.Item>
+                    <Form.Item>
+                      <Button type="primary" htmlType="submit">
+                        Approve!
+                      </Button>
+                    </Form.Item>
+                  </Form>
+                </Card>
+              </div>
+
+              <div style={{ margin: "auto", width: "70vw" }}>
+                <Card
+                  title="Send Dai for the transactions to work in this hack!"
+                  size="large"
+                  style={{ marginTop: 25, width: "100%" }}
+                >
+                  <Form form={sendDaiForm} onFinish={approveDai}>
+                    <Form.Item
+                      label="Amount"
                       name="amount"
                       rules={[{ required: true, message: "Please input a number!" }]}
                     >
@@ -230,7 +268,7 @@ function App() {
   Web3 modal helps us "connect" external wallets:
 */
 const web3Modal = new Web3Modal({
-  // network: "mainnet", // optional
+  network: "kovan", // optional
   cacheProvider: true, // optional
   providerOptions: {
     walletconnect: {

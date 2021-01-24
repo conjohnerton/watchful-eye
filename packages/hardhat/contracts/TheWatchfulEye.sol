@@ -63,11 +63,17 @@ contract TheWatchfulEye is FlashLoanReceiverBase, Ownable {
         );
     }
 
+    // Make sure user approves transfer first
+    function giveDai(uint256 amount) public {
+        (bool success) = daiToken.transferFrom(msg.sender, address(this), amount);
+        require(success, "The Watchful Eye did not receive any Dai. Did you forget to approve of the transfer?");
+    }
+
     fallback() external payable {}
 
     receive() external payable {}
 
-    function repayDebt(uint256[] calldata amounts, address onBehalfOf) internal {
+    function repayDebt(uint256[] calldata amounts, address onBehalfOf) public {
         daiToken.approve(address(_debtToCollateral), amounts[0]);
         _debtToCollateral.repay(onBehalfOf, amounts[0]);
     }
@@ -89,12 +95,12 @@ contract TheWatchfulEye is FlashLoanReceiverBase, Ownable {
         );
 
         // Repay loan using flashloan (dai) Recieve collateral (Eth)
-        repayDebt(amounts, ownerOfDebt);
+        // repayDebt(amounts, ownerOfDebt);
         
 
         // transferFrom u
         // Swap collateral and get flashloan asset (dai)
-        _linkToDai.doSwap();
+        // _linkToDai.doSwap();
 
         // At the end of your logic above, this contract owes
         // the flashloaned amounts + premiums.

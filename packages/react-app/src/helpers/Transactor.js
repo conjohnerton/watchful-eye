@@ -14,9 +14,8 @@ export default function Transactor(provider, gasPrice, etherscan) {
     return async tx => {
       const signer = provider.getSigner();
       const network = await provider.getNetwork();
-      console.log("network", network);
       const options = {
-        dappId: "0b58206a-f3c0-4701-a62f-73c7243e8c77", // GET YOUR OWN KEY AT https://account.blocknative.com
+        dappId: "82e66ad8-18a4-4861-9c09-84ef20c215de", // GET YOUR OWN KEY AT https://account.blocknative.com
         system: "ethereum",
         networkId: network.chainId,
         // darkMode: Boolean, // (default: false)
