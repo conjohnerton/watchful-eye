@@ -41,7 +41,7 @@
       {
         "indexed": false,
         "internalType": "uint256",
-        "name": "value",
+        "name": "sent",
         "type": "uint256"
       }
     ],

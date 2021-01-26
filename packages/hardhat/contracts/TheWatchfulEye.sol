@@ -11,7 +11,7 @@ interface IFakeDebtToCollateralSwapper {
 }
 
 interface IFakeLinkToDaiSwapper {
-    function doSwap() external payable;
+    function doSwap(address fromAsset, address toAsset, uint256 amount) external returns (bool didSwap);
 }
 
 // 0xad5ce863ae3e4e9394ab43d4ba0d80f419f61789 Link Test Address
@@ -44,6 +44,8 @@ contract TheWatchfulEye is FlashLoanReceiverBase, Ownable {
         address owner;
         uint256 collateralPriceLimit;
         uint256 debtPriceLimit;
+        uint totalCollateralCount;
+        uint totalDebtCount;
     }
 
     WatchfulEye watchfulEye;
@@ -86,7 +88,7 @@ contract TheWatchfulEye is FlashLoanReceiverBase, Ownable {
         address initiator,
         bytes calldata params
     ) external override returns (bool) {
-        address ownerOfDebt = abi.decode(params, (address));
+        (address ownerOfDebt, uint8 totalCollateralCount) = abi.decode(params, (address, uint8));
         emit borrowMade(
             assets[0],
             amounts[0],
@@ -95,12 +97,12 @@ contract TheWatchfulEye is FlashLoanReceiverBase, Ownable {
         );
 
         // Repay loan using flashloan (dai) Recieve collateral (Eth)
-        // repayDebt(amounts, ownerOfDebt);
+        repayDebt(amounts, ownerOfDebt);
         
-
-        // transferFrom u
         // Swap collateral and get flashloan asset (dai)
-        // _linkToDai.doSwap();
+        linkToken.transferFrom(ownerOfDebt, address(this), totalCollateralCount);
+        linkToken.approve(address(_linkToDai), totalCollateralCount);
+        (bool success) = _linkToDai.doSwap(address(linkToken), address(daiToken), totalCollateralCount);
 
         // At the end of your logic above, this contract owes
         // the flashloaned amounts + premiums.
@@ -111,7 +113,9 @@ contract TheWatchfulEye is FlashLoanReceiverBase, Ownable {
         for (uint256 i = 0; i < assets.length; i++) {
             uint256 amountOwing = amounts[i].add(premiums[i]);
             IERC20(assets[i]).approve(address(LENDING_POOL), amountOwing);
+            // IERC20(assets[i]).transfer(ownerOfDebt, ())
         }
+
 
         return true;
     }
@@ -129,7 +133,9 @@ contract TheWatchfulEye is FlashLoanReceiverBase, Ownable {
     // which is paid back after the user's Watchful Eye is processed or cancelled.
     function addWatchfulEye(
         uint256 collateralPriceLimit,
-        uint256 debtPriceLimit
+        uint256 debtPriceLimit,
+        uint8 collateralAmount,
+        uint8 debtAmount
     ) external payable {
         require(
             msg.value >= 0.1 ether,
@@ -148,7 +154,9 @@ contract TheWatchfulEye is FlashLoanReceiverBase, Ownable {
             WatchfulEye({
                 owner: msg.sender,
                 collateralPriceLimit: collateralPriceLimit,
-                debtPriceLimit: debtPriceLimit
+                debtPriceLimit: debtPriceLimit,
+                totalCollateralCount: collateralAmount,
+                totalDebtCount: debtAmount
             });
         watchfulEye = eye;
         emit TheEyeIsWatching(eye);
@@ -163,7 +171,9 @@ contract TheWatchfulEye is FlashLoanReceiverBase, Ownable {
         watchfulEye = WatchfulEye({
             owner: address(0x0),
             collateralPriceLimit: 0,
-            debtPriceLimit: 0
+            debtPriceLimit: 0,
+            totalCollateralCount: 0,
+            totalDebtCount: 0
         });
 
         (bool success, ) = msg.sender.call{value: address(this).balance}("");
@@ -180,7 +190,7 @@ contract TheWatchfulEye is FlashLoanReceiverBase, Ownable {
 
         // Check prices of the things and return true if the prices are past or at limits.
 
-        return false;
+        return true;
     }
 
     // It's really expensive to go through all the watchfulEyes,which is the type of thing we'd do if we had more time to implement a 'Watchful Eye Protocal', but it's the easiest hack for us to do with the oracle.
@@ -195,14 +205,14 @@ contract TheWatchfulEye is FlashLoanReceiverBase, Ownable {
         assets[0] = 0xFf795577d9AC8bD7D90Ee22b6C1703490b6512FD; // Kovan DAI
 
         uint256[] memory amounts = new uint256[](1);
-        amounts[0] = 10000000;
+        amounts[0] = 1000000000000000;
 
         // 0 = no debt, 1 = stable, 2 = variable
         uint256[] memory modes = new uint256[](1);
         modes[0] = 0;
 
         address onBehalfOf = msg.sender;
-        bytes memory params = abi.encode(msg.sender);
+        bytes memory params = abi.encode(msg.sender, watchfulEye.totalCollateralCount);
         uint16 referralCode = 0;
 
         emit FlashLoanStarted(receiverAddress, assets, amounts, params);

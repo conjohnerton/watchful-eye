@@ -14,7 +14,6 @@ import { Header, Account, Ramp, Contract, GasGauge } from "./components";
 import { INFURA_ID, ERC20_ABI, LINK_ADDRESS, DAI_ADDRESS } from "./constants";
 import { useForm } from "antd/lib/form/Form";
 import { Transactor } from "./helpers";
-require("dotenv").config();
 
 // 😬 Sorry for all the console logging 🤡
 const DEBUG = false;
@@ -28,13 +27,12 @@ if (DEBUG) console.log("📡 Connecting to Mainnet Ethereum");
 // const mainnetProvider = new InfuraProvider("mainnet",INFURA_ID);
 const mainnetProvider = new JsonRpcProvider("https://mainnet.infura.io/v3/" + INFURA_ID);
 // ( ⚠️ Getting "failed to meet quorum" errors? Check your INFURA_ID)
-console.log("window.location.hostname", window.location.hostname);
 // 🏠 Your local provider is usually pointed at your local blockchain
-const localProviderUrl = "http://" + window.location.hostname + ":8545"; // for xdai: https://dai.poa.network
+// const localProviderUrl = "http://" + window.location.hostname + ":8545"; // for xdai: https://dai.poa.network
 // as you deploy to other networks you can set REACT_APP_PROVIDER=https://dai.poa.network in packages/react-app/.env
-const localProviderUrlFromEnv = process.env.REACT_APP_PROVIDER ? process.env.REACT_APP_PROVIDER : localProviderUrl;
+// const localProviderUrlFromEnv = process.env.REACT_APP_PROVIDER ? process.env.REACT_APP_PROVIDER : localProviderUrl;
 if (DEBUG) console.log("🏠 Connecting to provider:", process.env.REACT_APP_PROVIDER);
-const localProvider = new JsonRpcProvider("https://kovan.infura.io/v3/a32e8add5ecf4916b841d38d66f47a4d");
+const localProvider = new JsonRpcProvider("https://kovan.infura.io/v3/" + INFURA_ID);
 
 function App() {
   const [injectedProvider, setInjectedProvider] = useState();
@@ -83,40 +81,38 @@ function App() {
     setRoute(window.location.pathname);
   }, [setRoute]);
 
-  // Getting the Aave user account data like was done before caused a HUGE slowdown. Let's not do that again. :)
-  // const [accountData, setAccountData] = useState(null);
-  // useEffect(() => {
-  //   if (aaveAccountDataReader) {
-  //     setAccountData(AccountDetailsFromBigNumbers(aaveAccountDataReader));
-  //   }
-  // }, [aaveAccountDataReader]);
-
-  const [collateralApprovalForm] = useForm();
-  const [sendDaiForm] = useForm();
-  async function approveLink() {
+  const [approveForm] = useForm();
+  async function approve() {
+    console.log("Doing all approvals...");
     const link_rw = new ethersContract(LINK_ADDRESS, ERC20_ABI, userProvider.getSigner());
-    tx(
+    const linkAmount = approveForm.getFieldValue("linkAmount");
+    await tx(
       link_rw.approve(
         readContracts["TheWatchfulEye"].address,
-        parseUnits(collateralApprovalForm.getFieldValue("amount")),
+        parseUnits(linkAmount),
       ),
     );
-  }
+    await tx(link_rw.transfer(
+      writeContracts["FakeDebtToCollateralSwapper"].address,
+      parseUnits(linkAmount)
+    ));
 
-  async function approveDai() {
     const dai_rw = new ethersContract(DAI_ADDRESS, ERC20_ABI, userProvider.getSigner());
-    await tx(dai_rw.approve(writeContracts["TheWatchfulEye"].address, parseUnits(sendDaiForm.getFieldValue("amount"))));
-    await tx(writeContracts.TheWatchfulEye.giveDai(parseUnits(sendDaiForm.getFieldValue("amount"))));
+    const daiAmount = approveForm.getFieldValue("daiAmount");
+    await tx(dai_rw.approve(writeContracts["TheWatchfulEye"].address, parseUnits(daiAmount)));
+    await tx(writeContracts.TheWatchfulEye.giveDai(parseUnits(daiAmount)));
   }
 
   async function doLoan() {
     try {
       console.log("Checking the Eye's concern levels. 👁️");
-      if (!(await writeContracts.TheWatchfulEye.isWatchfulEyeConcernedByWhatItSees())) {
+      if (await writeContracts.TheWatchfulEye.isWatchfulEyeConcernedByWhatItSees()) {
         console.log("The Watchful Eye 👁️ is concerned... The Eye 👁️ will fix it.");
         tx(writeContracts.TheWatchfulEye.makeFlashLoan());
       }
-    } catch (err) {}
+    } catch (err) {
+      console.error(err)
+    }
   }
 
   return (
@@ -132,17 +128,17 @@ function App() {
               }}
               to="/"
             >
-              Contract Admin Dashboard
+              Dashboard
             </Link>
           </Menu.Item>
-          <Menu.Item key="/userInfo">
+          <Menu.Item key="/adminDash">
             <Link
               onClick={() => {
-                setRoute("/userInfo");
+                setRoute("/adminDash");
               }}
-              to="/userInfo"
+              to="/adminDash"
             >
-              Aave User Info
+              Admin Dashboard
             </Link>
           </Menu.Item>
         </Menu>
@@ -150,41 +146,23 @@ function App() {
         <Switch>
           <Route exact path="/">
             <>
-              {/* Approve collateral interaction */}
               <div style={{ margin: "auto", width: "70vw" }}>
                 <Card
-                  title="Approve The Watchful Eye's interactions with your funds"
+                  title="Approve of the tokens to be used for the transaction!"
                   size="large"
                   style={{ marginTop: 25, width: "100%" }}
                 >
-                  <Form form={collateralApprovalForm} onFinish={approveLink}>
-                    {/* <Form.Item label="Collateral Amount" /> */}
+                  <Form form={approveForm} onFinish={approve}>
                     <Form.Item
-                      label="Collateral Amount"
-                      name="amount"
+                      label="Cost of debt in Dai"
+                      name="daiAmount"
                       rules={[{ required: true, message: "Please input a number!" }]}
                     >
                       <Input />
                     </Form.Item>
-                    <Form.Item>
-                      <Button type="primary" htmlType="submit">
-                        Approve!
-                      </Button>
-                    </Form.Item>
-                  </Form>
-                </Card>
-              </div>
-
-              <div style={{ margin: "auto", width: "70vw" }}>
-                <Card
-                  title="Send Dai for the transactions to work in this hack!"
-                  size="large"
-                  style={{ marginTop: 25, width: "100%" }}
-                >
-                  <Form form={sendDaiForm} onFinish={approveDai}>
                     <Form.Item
-                      label="Amount"
-                      name="amount"
+                      label="Amount of Link collateral"
+                      name="linkAmount"
                       rules={[{ required: true, message: "Please input a number!" }]}
                     >
                       <Input />
@@ -201,34 +179,21 @@ function App() {
               {/* Make flashloan */}
               <div style={{ margin: "auto", width: "70vw" }}>
                 <Card title="Do the loan" size="large" style={{ marginTop: 25, width: "100%" }}>
-                  <Form onFinish={doLoan}>
-                    <Form.Item>
-                      <Button type="primary" htmlType="submit">
-                        Send!
-                      </Button>
-                    </Form.Item>
-                  </Form>
+                  <Button onClick={doLoan} type="primary" >
+                    Liquidate me!
+                  </Button>
                 </Card>
               </div>
-
-              <Contract
-                name="TheWatchfulEye"
-                signer={userProvider.getSigner()}
-                provider={userProvider}
-                address={address}
-                blockExplorer={blockExplorer}
-              />
             </>
           </Route>
-          <Route path="/userInfo">
-            {/* <UserInfo
-              availableBorrowsETH={accountData?.availableBorrowsETH}
-              currentLiquidationThreshold={accountData?.currentLiquidationThreshold}
-              healthFactor={accountData?.healthFactor}
-              ltv={accountData?.ltv}
-              totalCollateralETH={accountData?.totalCollateralETH}
-              totalDebtETH={accountData?.totalDebtETH}
-            /> */}
+          <Route path="/adminDash">
+            <Contract
+              name="TheWatchfulEye"
+              signer={userProvider.getSigner()}
+              provider={userProvider}
+              address={address}
+              blockExplorer={blockExplorer}
+            />
           </Route>
         </Switch>
       </BrowserRouter>

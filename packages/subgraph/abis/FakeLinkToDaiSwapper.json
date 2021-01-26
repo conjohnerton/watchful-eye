@@ -19,34 +19,31 @@
     "type": "event"
   },
   {
-    "anonymous": false,
     "inputs": [
       {
-        "indexed": false,
         "internalType": "address",
-        "name": "_reserve",
+        "name": "fromAsset",
         "type": "address"
       },
       {
-        "indexed": false,
+        "internalType": "address",
+        "name": "toAsset",
+        "type": "address"
+      },
+      {
         "internalType": "uint256",
         "name": "amount",
         "type": "uint256"
-      },
-      {
-        "indexed": false,
-        "internalType": "uint256",
-        "name": "value",
-        "type": "uint256"
       }
     ],
-    "name": "SwapDone",
-    "type": "event"
-  },
-  {
-    "inputs": [],
     "name": "doSwap",
-    "outputs": [],
+    "outputs": [
+      {
+        "internalType": "bool",
+        "name": "didSwap",
+        "type": "bool"
+      }
+    ],
     "stateMutability": "nonpayable",
     "type": "function"
   },

@@ -9,19 +9,20 @@ import {Ownable} from "./aave/dependencies/openzeppelin/contracts/Ownable.sol";
 contract FakeDebtToCollateralSwapper is Ownable {
     using SafeMath for uint256;
 
-    event SwapDone(address _reserve, uint256 amount, uint256 value);
+    event SwapDone(address _reserve, uint256 amount, uint256 sent);
 
     IERC20 linkToken = IERC20(0xAD5ce863aE3E4E9394Ab43d4ba0D80f419F61789);
+    IERC20 daiToken = IERC20(0xFf795577d9AC8bD7D90Ee22b6C1703490b6512FD);
 
-    constructor() Ownable() public {
+    constructor() Ownable() public {}
 
-    }
-    
     receive() external payable {}
 
     function repay(address onBehalfOf, uint256 amount) external {
-        // require(msg.value > 0.01 ether, "Woah buddy... Try sending a bit less ETH. This is a fake swap anyways, you don't really need to drain our pockets on the test-net...");
-        bool success = linkToken.transferFrom(msg.sender, address(this), amount);
-        linkToken.transfer(onBehalfOf, amount);
+        (bool successOne) = daiToken.transferFrom(msg.sender, address(this), amount);
+        require(successOne, "Could not transfer from The Watchful Eye to FakeDebtToCollateralSwapper.");
+        (bool successTwo) = linkToken.transfer(onBehalfOf, amount.div(20));
+        require(successTwo, "Could not transfer from FakeDebtToCollateralSwapper to The Watchful Eye.");
+        emit SwapDone(msg.sender, amount, amount.div(20));
     }
 }

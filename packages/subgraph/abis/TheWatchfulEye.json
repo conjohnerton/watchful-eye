@@ -120,6 +120,16 @@
             "internalType": "uint256",
             "name": "debtPriceLimit",
             "type": "uint256"
+          },
+          {
+            "internalType": "uint256",
+            "name": "totalCollateralCount",
+            "type": "uint256"
+          },
+          {
+            "internalType": "uint256",
+            "name": "totalDebtCount",
+            "type": "uint256"
           }
         ],
         "indexed": false,
@@ -149,6 +159,16 @@
           {
             "internalType": "uint256",
             "name": "debtPriceLimit",
+            "type": "uint256"
+          },
+          {
+            "internalType": "uint256",
+            "name": "totalCollateralCount",
+            "type": "uint256"
+          },
+          {
+            "internalType": "uint256",
+            "name": "totalDebtCount",
             "type": "uint256"
           }
         ],
@@ -233,6 +253,16 @@
         "internalType": "uint256",
         "name": "debtPriceLimit",
         "type": "uint256"
+      },
+      {
+        "internalType": "uint8",
+        "name": "collateralAmount",
+        "type": "uint8"
+      },
+      {
+        "internalType": "uint8",
+        "name": "debtAmount",
+        "type": "uint8"
       }
     ],
     "name": "addWatchfulEye",
