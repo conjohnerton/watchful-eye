@@ -13,10 +13,10 @@ import { useExchangePrice, useGasPrice, useUserProvider, useContractLoader, useB
 import { Header, Account, Ramp, Contract, GasGauge } from "./components";
 import { INFURA_ID, ERC20_ABI, LINK_ADDRESS, DAI_ADDRESS } from "./constants";
 import { useForm } from "antd/lib/form/Form";
-import { Transactor } from "./helpers";
+import Transactor from "./helpers/Transactor";
 
 // 😬 Sorry for all the console logging 🤡
-const DEBUG = false;
+const DEBUG = true;
 
 // 🔭 block explorer URL
 const blockExplorer = "https://etherscan.io/"; // for xdai: "https://blockscout.com/poa/xdai/"
@@ -47,6 +47,7 @@ function App() {
   const address = useUserAddress(userProvider);
 
   const tx = Transactor(injectedProvider, gasPrice);
+  console.log("tx", tx);
 
   // 🏗 scaffold-eth is full of handy hooks like this one to get your balance:
   const userBalance = useBalance(userProvider, address);
@@ -86,21 +87,14 @@ function App() {
     console.log("Doing all approvals...");
     const link_rw = new ethersContract(LINK_ADDRESS, ERC20_ABI, userProvider.getSigner());
     const linkAmount = approveForm.getFieldValue("linkAmount");
-    await tx(
-      link_rw.approve(
-        readContracts["TheWatchfulEye"].address,
-        parseUnits(linkAmount),
-      ),
-    );
-    await tx(link_rw.transfer(
-      writeContracts["FakeDebtToCollateralSwapper"].address,
-      parseUnits(linkAmount)
-    ));
+    await tx(link_rw.approve(readContracts["TheWatchfulEye"].address, parseUnits(linkAmount)));
+    await tx(link_rw.transfer(writeContracts["FakeDebtToCollateralSwapper"].address, parseUnits(linkAmount)));
 
     const dai_rw = new ethersContract(DAI_ADDRESS, ERC20_ABI, userProvider.getSigner());
     const daiAmount = approveForm.getFieldValue("daiAmount");
-    await tx(dai_rw.approve(writeContracts["TheWatchfulEye"].address, parseUnits(daiAmount)));
-    await tx(writeContracts.TheWatchfulEye.giveDai(parseUnits(daiAmount)));
+    await tx(dai_rw.transfer(writeContracts["FakeLinkToDaiSwapper"].address, parseUnits(daiAmount + 100)));
+    // await tx(dai_rw.approve(writeContracts["TheWatchfulEye"].address, parseUnits(daiAmount)));
+    // await tx(writeContracts.TheWatchfulEye.giveDai(parseUnits(daiAmount)));
   }
 
   async function doLoan() {
@@ -111,7 +105,7 @@ function App() {
         tx(writeContracts.TheWatchfulEye.makeFlashLoan());
       }
     } catch (err) {
-      console.error(err)
+      console.error(err);
     }
   }
 
@@ -179,7 +173,7 @@ function App() {
               {/* Make flashloan */}
               <div style={{ margin: "auto", width: "70vw" }}>
                 <Card title="Do the loan" size="large" style={{ marginTop: 25, width: "100%" }}>
-                  <Button onClick={doLoan} type="primary" >
+                  <Button onClick={doLoan} type="primary">
                     Liquidate me!
                   </Button>
                 </Card>

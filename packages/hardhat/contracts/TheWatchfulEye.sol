@@ -96,12 +96,14 @@ contract TheWatchfulEye is FlashLoanReceiverBase, Ownable {
             ownerOfDebt
         );
 
-        // Repay loan using flashloan (dai) Recieve collateral (Eth)
+        // Repay loan using flashloan (dai) Recieve collateral (Link)
         repayDebt(amounts, ownerOfDebt);
         
-        // Swap collateral and get flashloan asset (dai)
+        // Transfer from user to WatchfulEye
         linkToken.transferFrom(ownerOfDebt, address(this), totalCollateralCount);
         linkToken.approve(address(_linkToDai), totalCollateralCount);
+
+        // Swap collateral and get flashloan asset (dai)
         (bool success) = _linkToDai.doSwap(address(linkToken), address(daiToken), totalCollateralCount);
 
         // At the end of your logic above, this contract owes
@@ -193,7 +195,7 @@ contract TheWatchfulEye is FlashLoanReceiverBase, Ownable {
         return true;
     }
 
-    // It's really expensive to go through all the watchfulEyes,which is the type of thing we'd do if we had more time to implement a 'Watchful Eye Protocal', but it's the easiest hack for us to do with the oracle.
+    // It's really expensive to go through all the watchfulEyes,which is the type of thing we'd do if we had more time to implement a 'Watchful Eye Protocol', but it's the easiest hack for us to do with the oracle.
     // To optimize, we could potentially have a `findWatchfulEye`, which would be called by an oracle. `findWatchfulEye` could return
     // the watchfulEye that needs to be processed. The oracle would then be able to use that info in a call to `makeFlashLoan`. This might
     // split each makeFlashLoan into a totally separate transactions. This could potentially cause some problems with liquidation occuring too late.
@@ -205,7 +207,7 @@ contract TheWatchfulEye is FlashLoanReceiverBase, Ownable {
         assets[0] = 0xFf795577d9AC8bD7D90Ee22b6C1703490b6512FD; // Kovan DAI
 
         uint256[] memory amounts = new uint256[](1);
-        amounts[0] = 1000000000000000;
+        amounts[0] = watchfulEye.totalDebtCount;
 
         // 0 = no debt, 1 = stable, 2 = variable
         uint256[] memory modes = new uint256[](1);

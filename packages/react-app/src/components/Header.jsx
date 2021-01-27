@@ -1,6 +1,5 @@
 import React from "react";
-import { Image, PageHeader } from "antd";
-// import { WatchfulEye } from "../index";
+import { PageHeader } from "antd";
 
 export default function Header() {
   return (
@@ -9,7 +8,7 @@ export default function Header() {
         title="👁️ Watchful Eye"
         subTitle="keeps a watchful eye on your loans... uses Aave flashloans to self-liquidate in case things go downhill ⛷️"
         style={{ cursor: "pointer" }}
-        backIcon={<Image src="%PUBLIC_URL%/WatchfulEye.png" />}
+        // backIcon={<Image src="https://imgur.com/a/CCyX8XY" />}
       />
     </a>
   );

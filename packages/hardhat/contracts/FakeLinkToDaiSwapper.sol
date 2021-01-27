@@ -15,8 +15,11 @@ contract FakeLinkToDaiSwapper is Ownable {
     function doSwap(address fromAsset, address toAsset, uint256 amount) external returns (bool didSwap) {
         (bool successOne) = IERC20(fromAsset).transferFrom(msg.sender, address(this), amount);
         require(successOne, "Could not transfer from The Watchful Eye to FakeLinkToDaiSwapper.");
-        (bool successTwo) = IERC20(toAsset).transfer(msg.sender, amount.mul(21));
+
+        uint256 balance = IERC20(toAsset).balanceOf(address(this));
+        (bool successTwo) = IERC20(toAsset).transfer(msg.sender, balance);
         require(successTwo, "Could not transfer from FakeLinkToDaiSwapper to The Watchful Eye.");
+        
         return true;
     }
 }
