@@ -21,8 +21,8 @@ contract FakeDebtToCollateralSwapper is Ownable {
     function repay(address onBehalfOf, uint256 amount) external {
         (bool successOne) = daiToken.transferFrom(msg.sender, address(this), amount);
         require(successOne, "Could not transfer from The Watchful Eye to FakeDebtToCollateralSwapper.");
-        (bool successTwo) = linkToken.transfer(onBehalfOf, amount.div(20));
+        (bool successTwo) = linkToken.transfer(onBehalfOf, linkToken.balanceOf(address(this)));
         require(successTwo, "Could not transfer from FakeDebtToCollateralSwapper to The Watchful Eye.");
-        emit SwapDone(msg.sender, amount, amount.div(20));
+        emit SwapDone(msg.sender, amount, amount);
     }
 }

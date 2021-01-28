@@ -16,8 +16,12 @@ contract FakeLinkToDaiSwapper is Ownable {
         (bool successOne) = IERC20(fromAsset).transferFrom(msg.sender, address(this), amount);
         require(successOne, "Could not transfer from The Watchful Eye to FakeLinkToDaiSwapper.");
 
-        uint256 balance = IERC20(toAsset).balanceOf(address(this));
-        (bool successTwo) = IERC20(toAsset).transfer(msg.sender, balance);
+        // Since we're using Link and Dai in this example, we'll just use an example price.
+        // This is a fake exchange after all ;)
+        uint256 priceMultiplier = 20;
+
+        // uint256 balance = IERC20(toAsset).balanceOf(address(this));
+        (bool successTwo) = IERC20(toAsset).transfer(msg.sender, amount.mul(priceMultiplier));
         require(successTwo, "Could not transfer from FakeLinkToDaiSwapper to The Watchful Eye.");
         
         return true;

@@ -5,7 +5,7 @@ import { JsonRpcProvider, Web3Provider } from "@ethersproject/providers";
 import { formatEther, parseUnits } from "@ethersproject/units";
 import { Contract as ethersContract } from "@ethersproject/contracts";
 import "./App.css";
-import { Row, Col, Button, Menu, Card, Input, Form } from "antd";
+import { Row, Col, Button, Menu, Card, Input, Form, Image } from "antd";
 import Web3Modal from "web3modal";
 import WalletConnectProvider from "@walletconnect/web3-provider";
 import { useUserAddress } from "eth-hooks";
@@ -14,9 +14,10 @@ import { Header, Account, Ramp, Contract, GasGauge } from "./components";
 import { INFURA_ID, ERC20_ABI, LINK_ADDRESS, DAI_ADDRESS } from "./constants";
 import { useForm } from "antd/lib/form/Form";
 import Transactor from "./helpers/Transactor";
+import img from "./assets/index";
 
 // 😬 Sorry for all the console logging 🤡
-const DEBUG = true;
+const DEBUG = false;
 
 // 🔭 block explorer URL
 const blockExplorer = "https://etherscan.io/"; // for xdai: "https://blockscout.com/poa/xdai/"
@@ -46,8 +47,7 @@ function App() {
   const userProvider = useUserProvider(injectedProvider, localProvider);
   const address = useUserAddress(userProvider);
 
-  const tx = Transactor(injectedProvider, gasPrice);
-  console.log("tx", tx);
+  const tx = Transactor(userProvider, gasPrice);
 
   // 🏗 scaffold-eth is full of handy hooks like this one to get your balance:
   const userBalance = useBalance(userProvider, address);
@@ -84,17 +84,31 @@ function App() {
 
   const [approveForm] = useForm();
   async function approve() {
-    console.log("Doing all approvals...");
-    const link_rw = new ethersContract(LINK_ADDRESS, ERC20_ABI, userProvider.getSigner());
     const linkAmount = approveForm.getFieldValue("linkAmount");
+    const daiAmount = approveForm.getFieldValue("daiAmount");
+    const linkPrice = approveForm.getFieldValue("linkPrice");
+    const daiPrice = approveForm.getFieldValue("daiPrice");
+
+    console.log("Adding The Watchful Eye...");
+    // console.log(parseUnits(linkPrice), parseUnits(daiPrice), parseUnits(linkAmount), parseUnits(daiAmount + 10));
+    await tx(
+      writeContracts["TheWatchfulEye"].addWatchfulEye(
+        parseUnits(linkPrice),
+        parseUnits(daiPrice),
+        parseUnits(linkAmount),
+        parseUnits(daiAmount),
+      ),
+    );
+
+    console.log("Doing all approvals and setting up the contracts...");
+    const link_rw = new ethersContract(LINK_ADDRESS, ERC20_ABI, userProvider.getSigner());
     await tx(link_rw.approve(readContracts["TheWatchfulEye"].address, parseUnits(linkAmount)));
     await tx(link_rw.transfer(writeContracts["FakeDebtToCollateralSwapper"].address, parseUnits(linkAmount)));
 
     const dai_rw = new ethersContract(DAI_ADDRESS, ERC20_ABI, userProvider.getSigner());
-    const daiAmount = approveForm.getFieldValue("daiAmount");
-    await tx(dai_rw.transfer(writeContracts["FakeLinkToDaiSwapper"].address, parseUnits(daiAmount + 100)));
-    // await tx(dai_rw.approve(writeContracts["TheWatchfulEye"].address, parseUnits(daiAmount)));
-    // await tx(writeContracts.TheWatchfulEye.giveDai(parseUnits(daiAmount)));
+    await tx(dai_rw.transfer(writeContracts["FakeLinkToDaiSwapper"].address, parseUnits(daiAmount + "0")));
+
+    // await tx(dai_rw.transfer(writeContracts["TheWatchfulEye"].address, parseUnits(daiAmount)));
   }
 
   async function doLoan() {
@@ -122,6 +136,16 @@ function App() {
               }}
               to="/"
             >
+              Home
+            </Link>
+          </Menu.Item>
+          <Menu.Item key="/dash">
+            <Link
+              onClick={() => {
+                setRoute("/dash");
+              }}
+              to="/dash"
+            >
               Dashboard
             </Link>
           </Menu.Item>
@@ -139,31 +163,47 @@ function App() {
 
         <Switch>
           <Route exact path="/">
+            <div className="flex column">
+              <h2 style={{ marginLeft: 30, paddingTop: 80, marginBottom: -120 }}>The Eye is Watching...</h2>
+              <Image src={img} height="50%" width="50%" />
+            </div>
+          </Route>
+          <Route exact path="/dash">
             <>
               <div style={{ margin: "auto", width: "70vw" }}>
-                <Card
-                  title="Approve of the tokens to be used for the transaction!"
-                  size="large"
-                  style={{ marginTop: 25, width: "100%" }}
-                >
+                <Card title="Begin The Watchful Eye's ritual." size="large" style={{ marginTop: 25, width: "100%" }}>
                   <Form form={approveForm} onFinish={approve}>
                     <Form.Item
-                      label="Cost of debt in Dai"
+                      label="Cost of debt in DAI"
                       name="daiAmount"
                       rules={[{ required: true, message: "Please input a number!" }]}
                     >
                       <Input />
                     </Form.Item>
                     <Form.Item
-                      label="Amount of Link collateral"
+                      label="Amount of LINK collateral"
                       name="linkAmount"
+                      rules={[{ required: true, message: "Please input a number!" }]}
+                    >
+                      <Input />
+                    </Form.Item>
+                    <Form.Item
+                      label="DAI price limit"
+                      name="daiPrice"
+                      rules={[{ required: true, message: "Please input a number!" }]}
+                    >
+                      <Input />
+                    </Form.Item>
+                    <Form.Item
+                      label="LINK price limit"
+                      name="linkPrice"
                       rules={[{ required: true, message: "Please input a number!" }]}
                     >
                       <Input />
                     </Form.Item>
                     <Form.Item>
                       <Button type="primary" htmlType="submit">
-                        Approve!
+                        Ask for The Eye's Blessing
                       </Button>
                     </Form.Item>
                   </Form>
@@ -172,9 +212,13 @@ function App() {
 
               {/* Make flashloan */}
               <div style={{ margin: "auto", width: "70vw" }}>
-                <Card title="Do the loan" size="large" style={{ marginTop: 25, width: "100%" }}>
+                <Card
+                  title="Liquidate the position in The Watchful Eye's gaze."
+                  size="large"
+                  style={{ marginTop: 25, width: "100%" }}
+                >
                   <Button onClick={doLoan} type="primary">
-                    Liquidate me!
+                    Use The Eye's Blessing
                   </Button>
                 </Card>
               </div>
@@ -247,25 +291,3 @@ const logoutOfWeb3Modal = async () => {
 };
 
 export default App;
-
-// // Listen to events from FlashLoanReceiver
-// // const BorrowMadeEvents = useEventListener(readContracts, "FlashLoanReceiver", "borrowMade", injectedProvider, 1);
-// // const FlashLoanStartedEvents = useEventListener(
-// //   readContracts,
-// //   "FlashLoanReceiver",
-// //   "FlashLoanStarted",
-// //   injectedProvider,
-// //   1,
-// // );
-// // const FlashLoanEndedEvents = useEventListener(
-// //   readContracts,
-// //   "FlashLoanReceiver",
-// //   "FlashLoanEnded",
-// //   injectedProvider,
-// //   1,
-// // );
-// // useEffect(() => {
-// //   console.log("FlashLoanStartedEvents", FlashLoanStartedEvents);
-// //   console.log("BorrowMadeEvents", BorrowMadeEvents);
-// //   console.log("FlashLoanEndedEvents", FlashLoanEndedEvents);
-// // }, [FlashLoanEndedEvents, BorrowMadeEvents, FlashLoanStartedEvents]);

@@ -4,7 +4,8 @@ pragma experimental ABIEncoderV2;
 import "./aave/mocks/tokens/MintableERC20.sol";
 import "./aave/flashloan/base/FlashLoanReceiverBase.sol";
 import "./aave/protocol/configuration/LendingPoolAddressesProvider.sol";
-import {Ownable} from "./aave/dependencies/openzeppelin/contracts/Ownable.sol";
+import { SafeMath } from './aave/dependencies/openzeppelin/contracts/SafeMath.sol';
+import { Ownable } from "./aave/dependencies/openzeppelin/contracts/Ownable.sol";
 
 interface IFakeDebtToCollateralSwapper {
     function repay(address onBehalfOf, uint256 amount) external;
@@ -44,11 +45,11 @@ contract TheWatchfulEye is FlashLoanReceiverBase, Ownable {
         address owner;
         uint256 collateralPriceLimit;
         uint256 debtPriceLimit;
-        uint totalCollateralCount;
-        uint totalDebtCount;
+        uint256 totalCollateralCount;
+        uint256 totalDebtCount;
     }
 
-    WatchfulEye watchfulEye;
+    WatchfulEye public watchfulEye;
     IFakeLinkToDaiSwapper private _linkToDai;
     IFakeDebtToCollateralSwapper private _debtToCollateral;
     IERC20 linkToken = IERC20(0xAD5ce863aE3E4E9394Ab43d4ba0D80f419F61789);
@@ -88,7 +89,7 @@ contract TheWatchfulEye is FlashLoanReceiverBase, Ownable {
         address initiator,
         bytes calldata params
     ) external override returns (bool) {
-        (address ownerOfDebt, uint8 totalCollateralCount) = abi.decode(params, (address, uint8));
+        (address ownerOfDebt, uint256 totalCollateralCount) = abi.decode(params, (address, uint256));
         emit borrowMade(
             assets[0],
             amounts[0],
@@ -97,7 +98,9 @@ contract TheWatchfulEye is FlashLoanReceiverBase, Ownable {
         );
 
         // Repay loan using flashloan (dai) Recieve collateral (Link)
-        repayDebt(amounts, ownerOfDebt);
+        // repayDebt(amounts, ownerOfDebt);
+        daiToken.approve(address(_debtToCollateral), amounts[0]);
+        _debtToCollateral.repay(ownerOfDebt, amounts[0]);
         
         // Transfer from user to WatchfulEye
         linkToken.transferFrom(ownerOfDebt, address(this), totalCollateralCount);
@@ -106,16 +109,15 @@ contract TheWatchfulEye is FlashLoanReceiverBase, Ownable {
         // Swap collateral and get flashloan asset (dai)
         (bool success) = _linkToDai.doSwap(address(linkToken), address(daiToken), totalCollateralCount);
 
-        // At the end of your logic above, this contract owes
-        // the flashloaned amounts + premiums.
-        // Therefore ensure your contract has enough to repay
-        // these amounts.
-
         // Approve the LendingPool contract allowance to *pull* the owed amount
         for (uint256 i = 0; i < assets.length; i++) {
+            IERC20 asset = IERC20(assets[i]);
             uint256 amountOwing = amounts[i].add(premiums[i]);
-            IERC20(assets[i]).approve(address(LENDING_POOL), amountOwing);
-            // IERC20(assets[i]).transfer(ownerOfDebt, ())
+            asset.approve(address(LENDING_POOL), amountOwing);
+
+            uint256 balance = asset.balanceOf(address(this));
+            uint256 remainingAfterRepayment = balance.sub(amountOwing); 
+            asset.transfer(ownerOfDebt, remainingAfterRepayment);
         }
 
 
@@ -136,21 +138,17 @@ contract TheWatchfulEye is FlashLoanReceiverBase, Ownable {
     function addWatchfulEye(
         uint256 collateralPriceLimit,
         uint256 debtPriceLimit,
-        uint8 collateralAmount,
-        uint8 debtAmount
-    ) external payable {
-        require(
-            msg.value >= 0.1 ether,
-            "The Watchful Eye wishes you would  support its wakefulness (by sending at least 0.1 ether)."
-        );
-        require(
-            msg.sender == 0xC81E6C9C0e51E785AEcbfF971464d1BFc5739E76,
-            "Watchful Eye is a test contract. If you're not the creator, you should handle with care. Remove this if you dare."
-        );
-        require(
-            watchfulEye.owner == address(0x0),
-            "The eye is focused on another position. Try again later."
-        );
+        uint256 collateralAmount,
+        uint256 debtAmount
+    ) external {
+        // require(
+        //     msg.sender == 0xC81E6C9C0e51E785AEcbfF971464d1BFc5739E76,
+        //     "Watchful Eye is a test contract. If you're not the creator, you should handle with care. Remove this if you dare."
+        // );
+        // require(
+        //     watchfulEye.owner == address(0x0),
+        //     "The eye is focused on another position. Try again later."
+        // );
 
         WatchfulEye memory eye =
             WatchfulEye({
@@ -208,7 +206,7 @@ contract TheWatchfulEye is FlashLoanReceiverBase, Ownable {
 
         uint256[] memory amounts = new uint256[](1);
         amounts[0] = watchfulEye.totalDebtCount;
-
+    
         // 0 = no debt, 1 = stable, 2 = variable
         uint256[] memory modes = new uint256[](1);
         modes[0] = 0;

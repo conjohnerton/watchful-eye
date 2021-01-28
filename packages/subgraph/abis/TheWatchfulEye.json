@@ -255,19 +255,19 @@
         "type": "uint256"
       },
       {
-        "internalType": "uint8",
+        "internalType": "uint256",
         "name": "collateralAmount",
-        "type": "uint8"
+        "type": "uint256"
       },
       {
-        "internalType": "uint8",
+        "internalType": "uint256",
         "name": "debtAmount",
-        "type": "uint8"
+        "type": "uint256"
       }
     ],
     "name": "addWatchfulEye",
     "outputs": [],
-    "stateMutability": "payable",
+    "stateMutability": "nonpayable",
     "type": "function"
   },
   {
@@ -411,6 +411,39 @@
     "name": "transferOwnership",
     "outputs": [],
     "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [],
+    "name": "watchfulEye",
+    "outputs": [
+      {
+        "internalType": "address",
+        "name": "owner",
+        "type": "address"
+      },
+      {
+        "internalType": "uint256",
+        "name": "collateralPriceLimit",
+        "type": "uint256"
+      },
+      {
+        "internalType": "uint256",
+        "name": "debtPriceLimit",
+        "type": "uint256"
+      },
+      {
+        "internalType": "uint256",
+        "name": "totalCollateralCount",
+        "type": "uint256"
+      },
+      {
+        "internalType": "uint256",
+        "name": "totalDebtCount",
+        "type": "uint256"
+      }
+    ],
+    "stateMutability": "view",
     "type": "function"
   },
   {
