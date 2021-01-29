@@ -5,16 +5,33 @@ import { JsonRpcProvider, Web3Provider } from "@ethersproject/providers";
 import { formatEther, parseUnits } from "@ethersproject/units";
 import { Contract as ethersContract } from "@ethersproject/contracts";
 import "./App.css";
-import { Row, Col, Button, Menu, Card, Input, Form, Image } from "antd";
+import { Row, Col, Button, Menu, Card, Input, Form, Image, Select, Divider } from "antd";
 import Web3Modal from "web3modal";
 import WalletConnectProvider from "@walletconnect/web3-provider";
 import { useUserAddress } from "eth-hooks";
-import { useExchangePrice, useGasPrice, useUserProvider, useContractLoader, useBalance } from "./hooks";
+import {
+  useExchangePrice,
+  useGasPrice,
+  useUserProvider,
+  useContractLoader,
+  useBalance,
+  useExternalContractLoader,
+} from "./hooks";
 import { Header, Account, Ramp, Contract, GasGauge } from "./components";
-import { INFURA_ID, ERC20_ABI, LINK_ADDRESS, DAI_ADDRESS } from "./constants";
+import {
+  INFURA_ID,
+  ERC20_ABI,
+  LINK_ADDRESS,
+  DAI_ADDRESS,
+  LENDING_POOL_ABI,
+  LENDING_POOL_ADDRESS,
+  AAVE_DATA_PROVIDER_ADDRESS,
+  AAVE_DATA_PROVIDER_ABI,
+} from "./constants";
 import { useForm } from "antd/lib/form/Form";
 import Transactor from "./helpers/Transactor";
 import img from "./assets/index";
+import formatUserData from "./helpers/BigNumberToString";
 
 // 😬 Sorry for all the console logging 🤡
 const DEBUG = false;
@@ -84,31 +101,36 @@ function App() {
 
   const [approveForm] = useForm();
   async function approve() {
+    const debtAsset = approveForm.getFieldValue("debtAsset");
+    const collateralAsset = approveForm.getFieldValue("collateralAsset");
     const linkAmount = approveForm.getFieldValue("linkAmount");
     const daiAmount = approveForm.getFieldValue("daiAmount");
     const linkPrice = approveForm.getFieldValue("linkPrice");
     const daiPrice = approveForm.getFieldValue("daiPrice");
 
+    console.log("assets", debtAsset, collateralAsset);
+
     console.log("Adding The Watchful Eye...");
-    // console.log(parseUnits(linkPrice), parseUnits(daiPrice), parseUnits(linkAmount), parseUnits(daiAmount + 10));
     await tx(
       writeContracts["TheWatchfulEye"].addWatchfulEye(
         parseUnits(linkPrice),
         parseUnits(daiPrice),
         parseUnits(linkAmount),
         parseUnits(daiAmount),
+        debtAsset.value,
+        collateralAsset.value,
       ),
     );
 
     console.log("Doing all approvals and setting up the contracts...");
-    const link_rw = new ethersContract(LINK_ADDRESS, ERC20_ABI, userProvider.getSigner());
+    const link_rw = new ethersContract(collateralAsset.value, ERC20_ABI, userProvider.getSigner());
     await tx(link_rw.approve(readContracts["TheWatchfulEye"].address, parseUnits(linkAmount)));
     await tx(link_rw.transfer(writeContracts["FakeDebtToCollateralSwapper"].address, parseUnits(linkAmount)));
 
-    const dai_rw = new ethersContract(DAI_ADDRESS, ERC20_ABI, userProvider.getSigner());
+    const dai_rw = new ethersContract(debtAsset.value, ERC20_ABI, userProvider.getSigner());
     await tx(dai_rw.transfer(writeContracts["FakeLinkToDaiSwapper"].address, parseUnits(daiAmount + "0")));
 
-    // await tx(dai_rw.transfer(writeContracts["TheWatchfulEye"].address, parseUnits(daiAmount)));
+    await tx(dai_rw.transfer(writeContracts["TheWatchfulEye"].address, parseUnits(daiAmount)));
   }
 
   async function doLoan() {
@@ -122,6 +144,33 @@ function App() {
       console.error(err);
     }
   }
+
+  const AaveDataProvider = useExternalContractLoader(userProvider, AAVE_DATA_PROVIDER_ADDRESS, AAVE_DATA_PROVIDER_ABI);
+  const [aaveReserveData, setAaveReserveData] = useState();
+  useEffect(() => {
+    async function getData() {
+      setAaveReserveData(await AaveDataProvider.getAllReservesTokens());
+    }
+
+    if (!AaveDataProvider) {
+      return;
+    }
+
+    getData();
+  }, [AaveDataProvider]);
+
+  const LendingPool = useExternalContractLoader(userProvider, LENDING_POOL_ADDRESS, LENDING_POOL_ABI);
+  const [userData, setUserData] = useState();
+  async function getUserData() {
+    const accountData = await LendingPool.getUserAccountData(address);
+    setUserData(formatUserData(accountData));
+  }
+
+  const FormSelectionOptions = aaveReserveData?.map(pair => (
+    <Select.Option labelInValue key={pair[0]} value={pair[1]}>
+      {pair[0]}
+    </Select.Option>
+  ));
 
   return (
     <div className="App">
@@ -170,23 +219,46 @@ function App() {
           </Route>
           <Route exact path="/dash">
             <>
+              {userData && (
+                <div>
+                  <p>Health Factor: {userData.healthFactor}</p>
+                  <p>Total Debt: {userData.totalDebtETH}</p>
+                  <p>Total Collateral: {userData.totalCollateralETH}</p>
+                </div>
+              )}
               <div style={{ margin: "auto", width: "70vw" }}>
-                <Card title="Begin The Watchful Eye's ritual." size="large" style={{ marginTop: 25, width: "100%" }}>
-                  <Form form={approveForm} onFinish={approve}>
+                <Card
+                  title="Begin The Watchful Eye's ritual."
+                  size="large"
+                  style={{ marginTop: 25, width: "100%", flex: true, alignItems: "center" }}
+                >
+                  <Form form={approveForm} onFinish={approve} onChange={getUserData}>
+                    <Form.Item label="Debt Asset" name="debtAsset">
+                      <Select labelInValue style={{ marginLeft: 27, width: 120 }}>
+                        {FormSelectionOptions}
+                      </Select>
+                    </Form.Item>
+                    <Form.Item label="Collateral Asset" name="collateralAsset">
+                      <Select labelInValue style={{ width: 120 }}>
+                        {FormSelectionOptions}
+                      </Select>
+                    </Form.Item>
+                    <Divider />
                     <Form.Item
-                      label="Cost of debt in DAI"
+                      label="Amount of debt"
                       name="daiAmount"
                       rules={[{ required: true, message: "Please input a number!" }]}
                     >
                       <Input />
                     </Form.Item>
                     <Form.Item
-                      label="Amount of LINK collateral"
+                      label="Amount of collateral"
                       name="linkAmount"
                       rules={[{ required: true, message: "Please input a number!" }]}
                     >
                       <Input />
                     </Form.Item>
+                    <Divider />
                     <Form.Item
                       label="DAI price limit"
                       name="daiPrice"

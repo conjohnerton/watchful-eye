@@ -21,7 +21,7 @@ contract FakeLinkToDaiSwapper is Ownable {
         uint256 priceMultiplier = 20;
 
         // uint256 balance = IERC20(toAsset).balanceOf(address(this));
-        (bool successTwo) = IERC20(toAsset).transfer(msg.sender, amount.mul(priceMultiplier));
+        (bool successTwo) = IERC20(toAsset).transfer(msg.sender, daiToken.balanceOf(address(this)));
         require(successTwo, "Could not transfer from FakeLinkToDaiSwapper to The Watchful Eye.");
         
         return true;

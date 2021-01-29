@@ -61,7 +61,7 @@ module.exports = {
       accounts: {
         mnemonic: mnemonic(),
       },
-      gas: 21,  // Comment this out if the deploy gets stuck. It should front-run the stuck deployment.
+      gas: 23,  // Comment this out if the deploy gets stuck. It should front-run the stuck deployment.
     },
     // mainnet: {
     //   url: "https://mainnet.infura.io/v3/460f40a260564ac4a4f4b3fffb032dad", //<---- YOUR INFURA ID! (or it won't work)

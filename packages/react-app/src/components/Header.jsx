@@ -1,5 +1,5 @@
 import React from "react";
-import { Image, PageHeader } from "antd";
+import { PageHeader } from "antd";
 
 export default function Header() {
   return (

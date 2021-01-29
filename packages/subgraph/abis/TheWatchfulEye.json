@@ -130,6 +130,16 @@
             "internalType": "uint256",
             "name": "totalDebtCount",
             "type": "uint256"
+          },
+          {
+            "internalType": "address",
+            "name": "debtAsset",
+            "type": "address"
+          },
+          {
+            "internalType": "address",
+            "name": "collateralAsset",
+            "type": "address"
           }
         ],
         "indexed": false,
@@ -170,6 +180,16 @@
             "internalType": "uint256",
             "name": "totalDebtCount",
             "type": "uint256"
+          },
+          {
+            "internalType": "address",
+            "name": "debtAsset",
+            "type": "address"
+          },
+          {
+            "internalType": "address",
+            "name": "collateralAsset",
+            "type": "address"
           }
         ],
         "indexed": false,
@@ -263,6 +283,16 @@
         "internalType": "uint256",
         "name": "debtAmount",
         "type": "uint256"
+      },
+      {
+        "internalType": "address",
+        "name": "debtAsset",
+        "type": "address"
+      },
+      {
+        "internalType": "address",
+        "name": "collateralAsset",
+        "type": "address"
       }
     ],
     "name": "addWatchfulEye",
@@ -310,16 +340,53 @@
     "type": "function"
   },
   {
-    "inputs": [
+    "inputs": [],
+    "name": "getWatchfulEye",
+    "outputs": [
       {
-        "internalType": "uint256",
-        "name": "amount",
-        "type": "uint256"
+        "components": [
+          {
+            "internalType": "address",
+            "name": "owner",
+            "type": "address"
+          },
+          {
+            "internalType": "uint256",
+            "name": "collateralPriceLimit",
+            "type": "uint256"
+          },
+          {
+            "internalType": "uint256",
+            "name": "debtPriceLimit",
+            "type": "uint256"
+          },
+          {
+            "internalType": "uint256",
+            "name": "totalCollateralCount",
+            "type": "uint256"
+          },
+          {
+            "internalType": "uint256",
+            "name": "totalDebtCount",
+            "type": "uint256"
+          },
+          {
+            "internalType": "address",
+            "name": "debtAsset",
+            "type": "address"
+          },
+          {
+            "internalType": "address",
+            "name": "collateralAsset",
+            "type": "address"
+          }
+        ],
+        "internalType": "struct TheWatchfulEye.WatchfulEye",
+        "name": "",
+        "type": "tuple"
       }
     ],
-    "name": "giveDai",
-    "outputs": [],
-    "stateMutability": "nonpayable",
+    "stateMutability": "view",
     "type": "function"
   },
   {
@@ -385,24 +452,6 @@
   {
     "inputs": [
       {
-        "internalType": "uint256[]",
-        "name": "amounts",
-        "type": "uint256[]"
-      },
-      {
-        "internalType": "address",
-        "name": "onBehalfOf",
-        "type": "address"
-      }
-    ],
-    "name": "repayDebt",
-    "outputs": [],
-    "stateMutability": "nonpayable",
-    "type": "function"
-  },
-  {
-    "inputs": [
-      {
         "internalType": "address",
         "name": "newOwner",
         "type": "address"
@@ -441,6 +490,16 @@
         "internalType": "uint256",
         "name": "totalDebtCount",
         "type": "uint256"
+      },
+      {
+        "internalType": "address",
+        "name": "debtAsset",
+        "type": "address"
+      },
+      {
+        "internalType": "address",
+        "name": "collateralAsset",
+        "type": "address"
       }
     ],
     "stateMutability": "view",
