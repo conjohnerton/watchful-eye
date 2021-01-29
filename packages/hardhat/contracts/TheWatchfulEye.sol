@@ -66,6 +66,10 @@ contract TheWatchfulEye is FlashLoanReceiverBase, Ownable {
         );
     }
 
+    function getWatchfulEye() public view returns(WatchfulEye memory) {
+        return watchfulEye;
+    }
+
     // Make sure user approves transfer first
     function giveDai(uint256 amount) public {
         (bool success) = daiToken.transferFrom(msg.sender, address(this), amount);
