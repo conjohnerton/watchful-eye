@@ -11,7 +11,7 @@
 
 ### Run the local chain
 > in a second terminal window:
-  1. `yarn chain`
+  1. `yarn fork`
 
 ### Compile and deploy contracts
 > in a third terminal window:
