@@ -21,8 +21,6 @@ const main = async () => {
     } // Whale account
   );
 
-  // console.log(ethers)
-
   const FakeEthToDaiSwapper = await deploy("FakeLinkToDaiSwapper", []);
 
   const FakeDebtToCollateralSwapper = await deploy(
@@ -33,12 +31,15 @@ const main = async () => {
   // 0xB53C1a33016B2DC2fF3653530bfF1848a515c8c5 mainnnet
   // 0x88757f2f99175387ab4c6a4b3067c77a695b0349 kovan
   const WatchfulEyeContract = await deploy("TheWatchfulEye", [
-    "0xB53C1a33016B2DC2fF3653530bfF1848a515c8c5",
-    "0xC586BeF4a0992C495Cf22e1aeEE4E446CECDee0E",
+    "0xB53C1a33016B2DC2fF3653530bfF1848a515c8c5", // Aave mainnet lending pool address provider
+    // "0xC586BeF4a0992C495Cf22e1aeEE4E446CECDee0E", // 1Inch mainnet address
+    "0x50FDA034C0Ce7a8f7EFDAebDA7Aa7cA21CC1267e", // 1Inch mainnet beta address (working!!!! I think)
+    // "0x71CD6666064C3A1354a3B4dca5fA1E2D3ee7D303", //mooniswap
     FakeEthToDaiSwapper.address,
     FakeDebtToCollateralSwapper.address,
-  ]); // <-- add in constructor args like line 16
+  ]);
 
+  // Fund the contracts for the mock operations.
   const signer = ethers.provider.getSigner(
     "0x708396f17127c42383E3b9014072679b2F60B82f"
   );
@@ -47,7 +48,6 @@ const main = async () => {
     erc20abi,
     signer
   );
-
   await link.transfer(FakeDebtToCollateralSwapper.address, parseUnits("1000"));
 
   const dai = new Contract(

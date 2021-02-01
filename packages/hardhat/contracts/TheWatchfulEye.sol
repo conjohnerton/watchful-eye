@@ -11,7 +11,12 @@ import {
 import {Ownable} from "./aave/dependencies/openzeppelin/contracts/Ownable.sol";
 
 interface IFakeDebtToCollateralSwapper {
-    function repay(address onBehalfOf, address debtAsset, uint256 amount, address collateralAsset) external;
+    function repay(
+        address onBehalfOf,
+        address debtAsset,
+        uint256 amount,
+        address collateralAsset
+    ) external;
 }
 
 interface IFakeLinkToDaiSwapper {
@@ -63,11 +68,11 @@ contract TheWatchfulEye is FlashLoanReceiverBase, Ownable {
 
     constructor(
         LendingPoolAddressesProvider _provider,
-        IOneSplit oneInch,
+        address oneInch,
         address fakeEthToDaiSwapper,
         address fakeDebtToCollateralSwapper
     ) public FlashLoanReceiverBase(_provider) {
-        _oneInch = oneInch;
+        _oneInch = IOneSplit(oneInch);
         _linkToDai = IFakeLinkToDaiSwapper(fakeEthToDaiSwapper);
         _debtToCollateral = IFakeDebtToCollateralSwapper(
             fakeDebtToCollateralSwapper
@@ -101,7 +106,12 @@ contract TheWatchfulEye is FlashLoanReceiverBase, Ownable {
             // Repay loan using flashloan (dai) Recieve collateral (Link)
             // repayDebt(amounts, ownerOfDebt);
             IERC20(debtAsset).approve(address(_debtToCollateral), amounts[0]);
-            _debtToCollateral.repay(ownerOfDebt, debtAsset, amounts[0], collateralAsset);
+            _debtToCollateral.repay(
+                ownerOfDebt,
+                debtAsset,
+                amounts[0],
+                collateralAsset
+            );
             // IERC20(debtAsset).approve(address(LENDING_POOL), amounts[0]);
             // LENDING_POOL.repay(debtAsset, amounts[0], 1, ownerOfDebt);
 
@@ -112,15 +122,33 @@ contract TheWatchfulEye is FlashLoanReceiverBase, Ownable {
                 totalCollateralCount
             );
             IERC20(collateralAsset).approve(
-                address(_linkToDai),
+                address(_oneInch),
                 totalCollateralCount
             );
 
             // Swap collateral and get flashloan asset (dai)
-            _linkToDai.doSwap(collateralAsset, debtAsset, totalCollateralCount);
+            // _linkToDai.doSwap(collateralAsset, debtAsset, totalCollateralCount);
+            (uint rate, uint256[] memory distribution) =
+                _oneInch.getExpectedReturn(
+                    IERC20(collateralAsset),
+                    IERC20(debtAsset),
+                    totalCollateralCount,
+                    10,
+                    0
+                );
+            uint256 returnAmount =
+                _oneInch.swap(
+                    IERC20(collateralAsset),
+                    IERC20(debtAsset),
+                    totalCollateralCount,
+                    0,
+                    distribution,
+                    0
+                );
         }
 
-        (address ownerOfDebt,,,) = abi.decode(params, (address, uint256, address, address));
+        (address ownerOfDebt, , , ) =
+            abi.decode(params, (address, uint256, address, address));
         // Approve the LendingPool contract allowance to *pull* the owed amount
         for (uint256 i = 0; i < assets.length; i++) {
             IERC20 asset = IERC20(assets[i]);

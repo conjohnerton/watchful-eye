@@ -29,7 +29,7 @@ import "../aave/dependencies/openzeppelin/contracts/IERC20.sol";
 //         \__________________/
 //
 
-contract IOneSplitConsts {
+abstract contract IOneSplitConsts {
     // flags = FLAG_DISABLE_UNISWAP + FLAG_DISABLE_BANCOR + ...
     uint256 internal constant FLAG_DISABLE_UNISWAP = 0x01;
     uint256 internal constant DEPRECATED_FLAG_DISABLE_KYBER = 0x02; // Deprecated
