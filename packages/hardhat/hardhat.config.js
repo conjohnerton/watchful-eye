@@ -19,7 +19,7 @@ const { isAddress, getAddress, formatUnits, parseUnits } = utils;
 //
 // Select the network you want to deploy to here:
 //
-const defaultNetwork = "kovan";
+const defaultNetwork = "localhost";
 
 function mnemonic() {
   try {
@@ -43,6 +43,11 @@ module.exports = {
   // (you will need to restart the `yarn run start` dev server after editing the .env)
 
   networks: {
+    hardhat: {
+      forking: {
+        url: `https://eth-mainnet.alchemyapi.io/v2/qnKw4PQmIZOgGPxvGSdM9Zy-rtjStgeh`,
+      },
+    },
     localhost: {
       url: "http://localhost:8545",
       /*
@@ -61,7 +66,7 @@ module.exports = {
       accounts: {
         mnemonic: mnemonic(),
       },
-      gas: 23,  // Comment this out if the deploy gets stuck. It should front-run the stuck deployment.
+      gas: 23, // Comment this out if the deploy gets stuck. It should front-run the stuck deployment.
     },
     // mainnet: {
     //   url: "https://mainnet.infura.io/v3/460f40a260564ac4a4f4b3fffb032dad", //<---- YOUR INFURA ID! (or it won't work)

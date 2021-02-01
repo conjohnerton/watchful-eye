@@ -76,9 +76,19 @@
         "type": "address"
       },
       {
+        "internalType": "address",
+        "name": "debtAsset",
+        "type": "address"
+      },
+      {
         "internalType": "uint256",
         "name": "amount",
         "type": "uint256"
+      },
+      {
+        "internalType": "address",
+        "name": "collateralAsset",
+        "type": "address"
       }
     ],
     "name": "repay",

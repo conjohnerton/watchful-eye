@@ -1,16 +1,17 @@
 pragma solidity 0.6.12;
 pragma experimental ABIEncoderV2;
 
-import "./aave/mocks/tokens/MintableERC20.sol";
+// import "./aave/mocks/tokens/MintableERC20.sol";
 import "./aave/flashloan/base/FlashLoanReceiverBase.sol";
 import "./aave/protocol/configuration/LendingPoolAddressesProvider.sol";
+import "./1Inch/IOneSplit.sol";
 import {
     SafeMath
 } from "./aave/dependencies/openzeppelin/contracts/SafeMath.sol";
 import {Ownable} from "./aave/dependencies/openzeppelin/contracts/Ownable.sol";
 
 interface IFakeDebtToCollateralSwapper {
-    function repay(address onBehalfOf, uint256 amount) external;
+    function repay(address onBehalfOf, address debtAsset, uint256 amount, address collateralAsset) external;
 }
 
 interface IFakeLinkToDaiSwapper {
@@ -58,12 +59,15 @@ contract TheWatchfulEye is FlashLoanReceiverBase, Ownable {
     WatchfulEye public watchfulEye;
     IFakeLinkToDaiSwapper private _linkToDai;
     IFakeDebtToCollateralSwapper private _debtToCollateral;
+    IOneSplit private _oneInch;
 
     constructor(
         LendingPoolAddressesProvider _provider,
+        IOneSplit oneInch,
         address fakeEthToDaiSwapper,
         address fakeDebtToCollateralSwapper
     ) public FlashLoanReceiverBase(_provider) {
+        _oneInch = oneInch;
         _linkToDai = IFakeLinkToDaiSwapper(fakeEthToDaiSwapper);
         _debtToCollateral = IFakeDebtToCollateralSwapper(
             fakeDebtToCollateralSwapper
@@ -97,7 +101,9 @@ contract TheWatchfulEye is FlashLoanReceiverBase, Ownable {
             // Repay loan using flashloan (dai) Recieve collateral (Link)
             // repayDebt(amounts, ownerOfDebt);
             IERC20(debtAsset).approve(address(_debtToCollateral), amounts[0]);
-            _debtToCollateral.repay(ownerOfDebt, amounts[0]);
+            _debtToCollateral.repay(ownerOfDebt, debtAsset, amounts[0], collateralAsset);
+            // IERC20(debtAsset).approve(address(LENDING_POOL), amounts[0]);
+            // LENDING_POOL.repay(debtAsset, amounts[0], 1, ownerOfDebt);
 
             // Transfer from user to WatchfulEye
             IERC20(collateralAsset).transferFrom(

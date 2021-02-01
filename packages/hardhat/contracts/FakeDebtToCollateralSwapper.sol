@@ -11,17 +11,14 @@ contract FakeDebtToCollateralSwapper is Ownable {
 
     event SwapDone(address _reserve, uint256 amount, uint256 sent);
 
-    IERC20 linkToken = IERC20(0xAD5ce863aE3E4E9394Ab43d4ba0D80f419F61789);
-    IERC20 daiToken = IERC20(0xFf795577d9AC8bD7D90Ee22b6C1703490b6512FD);
-
     constructor() Ownable() public {}
 
     receive() external payable {}
 
-    function repay(address onBehalfOf, uint256 amount) external {
-        (bool successOne) = daiToken.transferFrom(msg.sender, address(this), amount);
+    function repay(address onBehalfOf, address debtAsset, uint256 amount, address collateralAsset) external {
+        (bool successOne) = IERC20(debtAsset).transferFrom(msg.sender, address(this), amount);
         require(successOne, "Could not transfer from The Watchful Eye to FakeDebtToCollateralSwapper.");
-        (bool successTwo) = linkToken.transfer(onBehalfOf, linkToken.balanceOf(address(this)));
+        (bool successTwo) = IERC20(collateralAsset).transfer(onBehalfOf, IERC20(collateralAsset).balanceOf(address(this)));
         require(successTwo, "Could not transfer from FakeDebtToCollateralSwapper to The Watchful Eye.");
         emit SwapDone(msg.sender, amount, amount);
     }

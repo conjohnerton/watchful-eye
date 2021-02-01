@@ -7,9 +7,6 @@ import { Ownable } from "./aave/dependencies/openzeppelin/contracts/Ownable.sol"
 contract FakeLinkToDaiSwapper is Ownable {
     using SafeMath for uint256;
 
-    IERC20 daiToken = IERC20(0xFf795577d9AC8bD7D90Ee22b6C1703490b6512FD);
-    IERC20 linkToken = IERC20(0xAD5ce863aE3E4E9394Ab43d4ba0D80f419F61789);
-
     receive() external payable {}
 
     function doSwap(address fromAsset, address toAsset, uint256 amount) external returns (bool didSwap) {
@@ -21,7 +18,7 @@ contract FakeLinkToDaiSwapper is Ownable {
         uint256 priceMultiplier = 20;
 
         // uint256 balance = IERC20(toAsset).balanceOf(address(this));
-        (bool successTwo) = IERC20(toAsset).transfer(msg.sender, daiToken.balanceOf(address(this)));
+        (bool successTwo) = IERC20(toAsset).transfer(msg.sender, IERC20(toAsset).balanceOf(address(this)));
         require(successTwo, "Could not transfer from FakeLinkToDaiSwapper to The Watchful Eye.");
         
         return true;

@@ -21,8 +21,6 @@ import { Header, Account, Ramp, Contract, GasGauge } from "./components";
 import {
   INFURA_ID,
   ERC20_ABI,
-  LINK_ADDRESS,
-  DAI_ADDRESS,
   LENDING_POOL_ABI,
   LENDING_POOL_ADDRESS,
   AAVE_DATA_PROVIDER_ADDRESS,
@@ -44,13 +42,15 @@ if (DEBUG) console.log("📡 Connecting to Mainnet Ethereum");
 //const mainnetProvider = getDefaultProvider("mainnet", { infura: INFURA_ID, etherscan: ETHERSCAN_KEY, quorum: 1 });
 // const mainnetProvider = new InfuraProvider("mainnet",INFURA_ID);
 const mainnetProvider = new JsonRpcProvider("https://mainnet.infura.io/v3/" + INFURA_ID);
+// const mainnetProvider = new JsonRpcProvider("https://eth-mainnet.alchemyapi.io/v2/2x0LqJcsqPSf6zLESjiUOMjbbBmGRPZb");
 // ( ⚠️ Getting "failed to meet quorum" errors? Check your INFURA_ID)
 // 🏠 Your local provider is usually pointed at your local blockchain
-// const localProviderUrl = "http://" + window.location.hostname + ":8545"; // for xdai: https://dai.poa.network
+const localProviderUrl = "http://" + window.location.hostname + ":8545"; // for xdai: https://dai.poa.network
 // as you deploy to other networks you can set REACT_APP_PROVIDER=https://dai.poa.network in packages/react-app/.env
-// const localProviderUrlFromEnv = process.env.REACT_APP_PROVIDER ? process.env.REACT_APP_PROVIDER : localProviderUrl;
-if (DEBUG) console.log("🏠 Connecting to provider:", process.env.REACT_APP_PROVIDER);
-const localProvider = new JsonRpcProvider("https://kovan.infura.io/v3/" + INFURA_ID);
+const localProviderUrlFromEnv = process.env.REACT_APP_PROVIDER ? process.env.REACT_APP_PROVIDER : localProviderUrl;
+if (DEBUG) console.log("🏠 Connecting to provider:", localProviderUrlFromEnv);
+// const localProvider = new JsonRpcProvider("https://kovan.infura.io/v3/" + INFURA_ID);
+const localProvider = new JsonRpcProvider(localProviderUrlFromEnv);
 
 function App() {
   const [injectedProvider, setInjectedProvider] = useState();
@@ -108,7 +108,7 @@ function App() {
     const linkPrice = approveForm.getFieldValue("linkPrice");
     const daiPrice = approveForm.getFieldValue("daiPrice");
 
-    console.log("assets", debtAsset, collateralAsset);
+    console.log("Assets:", debtAsset, collateralAsset);
 
     console.log("Adding The Watchful Eye...");
     await tx(
@@ -125,12 +125,12 @@ function App() {
     console.log("Doing all approvals and setting up the contracts...");
     const link_rw = new ethersContract(collateralAsset.value, ERC20_ABI, userProvider.getSigner());
     await tx(link_rw.approve(readContracts["TheWatchfulEye"].address, parseUnits(linkAmount)));
-    await tx(link_rw.transfer(writeContracts["FakeDebtToCollateralSwapper"].address, parseUnits(linkAmount)));
+    // await tx(link_rw.transfer(writeContracts["FakeDebtToCollateralSwapper"].address, parseUnits(linkAmount)));
 
-    const dai_rw = new ethersContract(debtAsset.value, ERC20_ABI, userProvider.getSigner());
-    await tx(dai_rw.transfer(writeContracts["FakeLinkToDaiSwapper"].address, parseUnits(daiAmount + "0")));
+    // const dai_rw = new ethersContract(debtAsset.value, ERC20_ABI, userProvider.getSigner());
+    // await tx(dai_rw.transfer(writeContracts["FakeLinkToDaiSwapper"].address, parseUnits(daiAmount + "0")));
 
-    await tx(dai_rw.transfer(writeContracts["TheWatchfulEye"].address, parseUnits(daiAmount)));
+    // await tx(dai_rw.transfer(writeContracts["TheWatchfulEye"].address, parseUnits(daiAmount)));
   }
 
   async function doLoan() {
@@ -159,7 +159,7 @@ function App() {
     getData();
   }, [AaveDataProvider]);
 
-  const LendingPool = useExternalContractLoader(userProvider, LENDING_POOL_ADDRESS, LENDING_POOL_ABI);
+  const LendingPool = useExternalContractLoader(localProvider, LENDING_POOL_ADDRESS, LENDING_POOL_ABI);
   const [userData, setUserData] = useState();
   async function getUserData() {
     const accountData = await LendingPool.getUserAccountData(address);
@@ -167,7 +167,7 @@ function App() {
   }
 
   const FormSelectionOptions = aaveReserveData?.map(pair => (
-    <Select.Option labelInValue key={pair[0]} value={pair[1]}>
+    <Select.Option key={pair[0]} value={pair[1]}>
       {pair[0]}
     </Select.Option>
   ));
