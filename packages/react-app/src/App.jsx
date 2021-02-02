@@ -30,6 +30,7 @@ import { useForm } from "antd/lib/form/Form";
 import Transactor from "./helpers/Transactor";
 import img from "./assets/index";
 import formatUserData from "./helpers/BigNumberToString";
+import { ConsoleSqlOutlined } from "@ant-design/icons";
 
 // 😬 Sorry for all the console logging 🤡
 const DEBUG = false;
@@ -111,26 +112,24 @@ function App() {
     console.log("Assets:", debtAsset, collateralAsset);
 
     console.log("Adding The Watchful Eye...");
+
+    // console.log(aaveReserveData);
+    // console.log(aaveReserveData.find(pair => pair[0] === collateralAsset.label.slice(1)));
     await tx(
       writeContracts["TheWatchfulEye"].addWatchfulEye(
-        parseUnits(linkPrice),
-        parseUnits(daiPrice),
-        parseUnits(linkAmount),
-        parseUnits(daiAmount),
+        parseUnits(linkPrice, "wei"),
+        parseUnits(daiPrice, "wei"),
+        parseUnits(linkAmount, "wei"),
+        parseUnits(daiAmount, "wei"),
         debtAsset.value,
         collateralAsset.value,
+        aaveReserveData.find(pair => pair[0] === collateralAsset.label.slice(1)).tokenAddress,
       ),
     );
 
     console.log("Doing all approvals and setting up the contracts...");
     const link_rw = new ethersContract(collateralAsset.value, ERC20_ABI, userProvider.getSigner());
-    await tx(link_rw.approve(readContracts["TheWatchfulEye"].address, parseUnits(linkAmount)));
-    // await tx(link_rw.transfer(writeContracts["FakeDebtToCollateralSwapper"].address, parseUnits(linkAmount)));
-
-    // const dai_rw = new ethersContract(debtAsset.value, ERC20_ABI, userProvider.getSigner());
-    // await tx(dai_rw.transfer(writeContracts["FakeLinkToDaiSwapper"].address, parseUnits(daiAmount + "0")));
-
-    // await tx(dai_rw.transfer(writeContracts["TheWatchfulEye"].address, parseUnits(daiAmount)));
+    await tx(link_rw.approve(readContracts["TheWatchfulEye"].address, parseUnits(linkAmount, "wei")));
   }
 
   async function doLoan() {
@@ -147,9 +146,11 @@ function App() {
 
   const AaveDataProvider = useExternalContractLoader(userProvider, AAVE_DATA_PROVIDER_ADDRESS, AAVE_DATA_PROVIDER_ABI);
   const [aaveReserveData, setAaveReserveData] = useState();
+  const [aTokens, setATokens] = useState();
   useEffect(() => {
     async function getData() {
       setAaveReserveData(await AaveDataProvider.getAllReservesTokens());
+      setATokens(await AaveDataProvider.getAllATokens());
     }
 
     if (!AaveDataProvider) {
@@ -161,12 +162,22 @@ function App() {
 
   const LendingPool = useExternalContractLoader(localProvider, LENDING_POOL_ADDRESS, LENDING_POOL_ABI);
   const [userData, setUserData] = useState();
-  async function getUserData() {
-    const accountData = await LendingPool.getUserAccountData(address);
-    setUserData(formatUserData(accountData));
-  }
+  useEffect(() => {
+    async function getUserData() {
+      const accountData = await LendingPool.getUserAccountData(address);
+      setUserData(formatUserData(accountData));
+    }
 
-  const FormSelectionOptions = aaveReserveData?.map(pair => (
+    LendingPool && getUserData();
+  }, [LendingPool, address]);
+
+  const ReserveTokenOptions = aaveReserveData?.map(pair => (
+    <Select.Option key={pair[0]} value={pair[1]}>
+      {pair[0]}
+    </Select.Option>
+  ));
+
+  const ATokenOptions = aTokens?.map(pair => (
     <Select.Option key={pair[0]} value={pair[1]}>
       {pair[0]}
     </Select.Option>
@@ -232,15 +243,15 @@ function App() {
                   size="large"
                   style={{ marginTop: 25, width: "100%", flex: true, alignItems: "center" }}
                 >
-                  <Form form={approveForm} onFinish={approve} onChange={getUserData}>
+                  <Form form={approveForm} onFinish={approve}>
                     <Form.Item label="Debt Asset" name="debtAsset">
                       <Select labelInValue style={{ marginLeft: 27, width: 120 }}>
-                        {FormSelectionOptions}
+                        {ReserveTokenOptions}
                       </Select>
                     </Form.Item>
                     <Form.Item label="Collateral Asset" name="collateralAsset">
                       <Select labelInValue style={{ width: 120 }}>
-                        {FormSelectionOptions}
+                        {ATokenOptions}
                       </Select>
                     </Form.Item>
                     <Divider />
@@ -260,14 +271,14 @@ function App() {
                     </Form.Item>
                     <Divider />
                     <Form.Item
-                      label="DAI price limit"
+                      label="Debt price limit"
                       name="daiPrice"
                       rules={[{ required: true, message: "Please input a number!" }]}
                     >
                       <Input />
                     </Form.Item>
                     <Form.Item
-                      label="LINK price limit"
+                      label="Collateral price limit"
                       name="linkPrice"
                       rules={[{ required: true, message: "Please input a number!" }]}
                     >
@@ -297,6 +308,13 @@ function App() {
             </>
           </Route>
           <Route path="/adminDash">
+            <Contract
+              name="FakeDebtToCollateralSwapper"
+              signer={userProvider.getSigner()}
+              provider={userProvider}
+              address={address}
+              blockExplorer={blockExplorer}
+            />
             <Contract
               name="TheWatchfulEye"
               signer={userProvider.getSigner()}

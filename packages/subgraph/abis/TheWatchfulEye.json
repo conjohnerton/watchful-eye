@@ -145,6 +145,11 @@
             "internalType": "address",
             "name": "collateralAsset",
             "type": "address"
+          },
+          {
+            "internalType": "address",
+            "name": "collateralReserveAsset",
+            "type": "address"
           }
         ],
         "indexed": false,
@@ -194,6 +199,11 @@
           {
             "internalType": "address",
             "name": "collateralAsset",
+            "type": "address"
+          },
+          {
+            "internalType": "address",
+            "name": "collateralReserveAsset",
             "type": "address"
           }
         ],
@@ -298,6 +308,11 @@
         "internalType": "address",
         "name": "collateralAsset",
         "type": "address"
+      },
+      {
+        "internalType": "address",
+        "name": "collateralReserve",
+        "type": "address"
       }
     ],
     "name": "addWatchfulEye",
@@ -383,6 +398,11 @@
           {
             "internalType": "address",
             "name": "collateralAsset",
+            "type": "address"
+          },
+          {
+            "internalType": "address",
+            "name": "collateralReserveAsset",
             "type": "address"
           }
         ],
@@ -504,6 +524,11 @@
       {
         "internalType": "address",
         "name": "collateralAsset",
+        "type": "address"
+      },
+      {
+        "internalType": "address",
+        "name": "collateralReserveAsset",
         "type": "address"
       }
     ],

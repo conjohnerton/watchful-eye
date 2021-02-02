@@ -2,6 +2,7 @@ pragma solidity 0.6.12;
 pragma experimental ABIEncoderV2;
 
 // import "./aave/mocks/tokens/MintableERC20.sol";
+import "hardhat/console.sol";
 import "./aave/flashloan/base/FlashLoanReceiverBase.sol";
 import "./aave/protocol/configuration/LendingPoolAddressesProvider.sol";
 import "./1Inch/IOneSplit.sol";
@@ -59,6 +60,7 @@ contract TheWatchfulEye is FlashLoanReceiverBase, Ownable {
         uint256 totalDebtCount;
         address debtAsset;
         address collateralAsset;
+        address collateralReserveAsset;
     }
 
     WatchfulEye public watchfulEye;
@@ -95,16 +97,20 @@ contract TheWatchfulEye is FlashLoanReceiverBase, Ownable {
         address initiator,
         bytes calldata params
     ) external override returns (bool) {
+        // Repay the debt 
         {
             (
                 address ownerOfDebt,
                 uint256 totalCollateralCount,
                 address debtAsset,
-                address collateralAsset
-            ) = abi.decode(params, (address, uint256, address, address));
+                address collateralAsset,
 
-            // Repay loan using flashloan (dai) Recieve collateral (Link)
-            // repayDebt(amounts, ownerOfDebt);
+            ) =
+                abi.decode(
+                    params,
+                    (address, uint256, address, address, address)
+                );
+
             IERC20(debtAsset).approve(address(_debtToCollateral), amounts[0]);
             _debtToCollateral.repay(
                 ownerOfDebt,
@@ -114,6 +120,27 @@ contract TheWatchfulEye is FlashLoanReceiverBase, Ownable {
             );
             // IERC20(debtAsset).approve(address(LENDING_POOL), amounts[0]);
             // LENDING_POOL.repay(debtAsset, amounts[0], 1, ownerOfDebt);
+        }
+
+        // Swap aToken to reserve token on Aave
+        {
+            (
+                address ownerOfDebt,
+                uint256 totalCollateralCount,
+                address debtAsset,
+                address collateralAsset,
+                address reserveAsset
+            ) =
+                abi.decode(
+                    params,
+                    (address, uint256, address, address, address)
+                );
+
+            console.log(
+                "Collateral balance",
+                IERC20(collateralAsset).balanceOf(ownerOfDebt)
+            );
+            console.log("Collateral count", totalCollateralCount);
 
             // Transfer from user to WatchfulEye
             IERC20(collateralAsset).transferFrom(
@@ -121,24 +148,63 @@ contract TheWatchfulEye is FlashLoanReceiverBase, Ownable {
                 address(this),
                 totalCollateralCount
             );
+
+            // Approve of transfer to Aave
             IERC20(collateralAsset).approve(
+                address(LENDING_POOL),
+                totalCollateralCount
+            );
+
+            // Swap the aToken for it's normal token on Aave
+            LENDING_POOL.withdraw(
+                reserveAsset,
+                totalCollateralCount,
+                address(this)
+            );
+
+            console.log(
+                "reserve balance",
+                IERC20(reserveAsset).balanceOf(address(this))
+            );
+            console.log("Collateral count", totalCollateralCount);
+        }
+
+        // Swap reserve asset to debt asset using 1Inch
+        {
+            (
+                address ownerOfDebt,
+                uint256 totalCollateralCount,
+                address debtAsset,
+                ,
+                address reserveAsset
+            ) =
+                abi.decode(
+                    params,
+                    (address, uint256, address, address, address)
+                );
+
+            IERC20(reserveAsset).approve(
                 address(_oneInch),
                 totalCollateralCount
             );
 
-            // Swap collateral and get flashloan asset (dai)
-            // _linkToDai.doSwap(collateralAsset, debtAsset, totalCollateralCount);
-            (uint rate, uint256[] memory distribution) =
+            (uint256 rate, uint256[] memory distribution) =
                 _oneInch.getExpectedReturn(
-                    IERC20(collateralAsset),
+                    IERC20(reserveAsset),
                     IERC20(debtAsset),
                     totalCollateralCount,
-                    10,
+                    3,
                     0
                 );
+
+            require(
+                rate >= amounts[0].add(premiums[0]),
+                "The collateral swap would not return enough of the debt asset to pay the flashloan"
+            );
+
             uint256 returnAmount =
                 _oneInch.swap(
-                    IERC20(collateralAsset),
+                    IERC20(reserveAsset),
                     IERC20(debtAsset),
                     totalCollateralCount,
                     0,
@@ -147,8 +213,9 @@ contract TheWatchfulEye is FlashLoanReceiverBase, Ownable {
                 );
         }
 
-        (address ownerOfDebt, , , ) =
-            abi.decode(params, (address, uint256, address, address));
+        (address ownerOfDebt, , , , address reserveAsset) =
+            abi.decode(params, (address, uint256, address, address, address));
+            
         // Approve the LendingPool contract allowance to *pull* the owed amount
         for (uint256 i = 0; i < assets.length; i++) {
             IERC20 asset = IERC20(assets[i]);
@@ -159,6 +226,8 @@ contract TheWatchfulEye is FlashLoanReceiverBase, Ownable {
             uint256 remainingAfterRepayment = balance.sub(amountOwing);
             asset.transfer(ownerOfDebt, remainingAfterRepayment);
         }
+
+        IERC20(reserveAsset).transfer(ownerOfDebt, IERC20(reserveAsset).balanceOf(address(this)));
 
         return true;
     }
@@ -180,7 +249,8 @@ contract TheWatchfulEye is FlashLoanReceiverBase, Ownable {
         uint256 collateralAmount,
         uint256 debtAmount,
         address debtAsset,
-        address collateralAsset
+        address collateralAsset,
+        address collateralReserve
     ) external {
         WatchfulEye memory eye =
             WatchfulEye({
@@ -190,7 +260,8 @@ contract TheWatchfulEye is FlashLoanReceiverBase, Ownable {
                 totalCollateralCount: collateralAmount,
                 totalDebtCount: debtAmount,
                 debtAsset: debtAsset,
-                collateralAsset: collateralAsset
+                collateralAsset: collateralAsset,
+                collateralReserveAsset: collateralReserve
             });
         watchfulEye = eye;
         emit TheEyeIsWatching(eye);
@@ -209,11 +280,9 @@ contract TheWatchfulEye is FlashLoanReceiverBase, Ownable {
             totalCollateralCount: 0,
             totalDebtCount: 0,
             debtAsset: address(0x0),
-            collateralAsset: address(0x0)
+            collateralAsset: address(0x0),
+            collateralReserveAsset: address(0x0)
         });
-
-        (bool success, ) = msg.sender.call{value: address(this).balance}("");
-        require(success, "refund failed");
     }
 
     // The oracle calls this to see if it needs to call makeFlashLoan
@@ -253,7 +322,8 @@ contract TheWatchfulEye is FlashLoanReceiverBase, Ownable {
                 msg.sender,
                 watchfulEye.totalCollateralCount,
                 watchfulEye.debtAsset,
-                watchfulEye.collateralAsset
+                watchfulEye.collateralAsset,
+                watchfulEye.collateralReserveAsset
             );
         uint16 referralCode = 0;
 
