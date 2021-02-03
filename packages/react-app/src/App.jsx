@@ -30,7 +30,6 @@ import { useForm } from "antd/lib/form/Form";
 import Transactor from "./helpers/Transactor";
 import img from "./assets/index";
 import formatUserData from "./helpers/BigNumberToString";
-import { ConsoleSqlOutlined } from "@ant-design/icons";
 
 // 😬 Sorry for all the console logging 🤡
 const DEBUG = false;
@@ -101,7 +100,7 @@ function App() {
   }, [setRoute]);
 
   const [approveForm] = useForm();
-  async function approve() {
+  async function addWatchfulEye() {
     const debtAsset = approveForm.getFieldValue("debtAsset");
     const collateralAsset = approveForm.getFieldValue("collateralAsset");
     const linkAmount = approveForm.getFieldValue("linkAmount");
@@ -109,12 +108,7 @@ function App() {
     const linkPrice = approveForm.getFieldValue("linkPrice");
     const daiPrice = approveForm.getFieldValue("daiPrice");
 
-    console.log("Assets:", debtAsset, collateralAsset);
-
     console.log("Adding The Watchful Eye...");
-
-    // console.log(aaveReserveData);
-    // console.log(aaveReserveData.find(pair => pair[0] === collateralAsset.label.slice(1)));
     await tx(
       writeContracts["TheWatchfulEye"].addWatchfulEye(
         parseUnits(linkPrice, "wei"),
@@ -126,6 +120,13 @@ function App() {
         aaveReserveData.find(pair => pair[0] === collateralAsset.label.slice(1)).tokenAddress,
       ),
     );
+
+    setApproved(true);
+  }
+
+  async function approve() {
+    const collateralAsset = approveForm.getFieldValue("collateralAsset");
+    const linkAmount = approveForm.getFieldValue("linkAmount");
 
     console.log("Doing all approvals and setting up the contracts...");
     const link_rw = new ethersContract(collateralAsset.value, ERC20_ABI, userProvider.getSigner());
@@ -183,6 +184,36 @@ function App() {
     </Select.Option>
   ));
 
+  async function doBorrow() {
+    const LINK = "0x514910771AF9Ca656af840dff83E8264EcF986CA";
+    const DAI_ADDRESS = "0x6B175474E89094C44Da98b954EedeAC495271d0F";
+    const token = new ethersContract(LINK, ERC20_ABI, userProvider.getSigner());
+    await token.approve(LENDING_POOL_ADDRESS, parseUnits("10000000000000000000", "wei"));
+
+    const aave = new ethersContract(LENDING_POOL_ADDRESS, LENDING_POOL_ABI, userProvider.getSigner());
+    await aave.deposit(LINK, parseUnits("1"), address, parseUnits("0"));
+    await aave.borrow(
+      DAI_ADDRESS,
+      parseUnits("1000000000000000", "wei"), // amount
+      parseUnits("1", "wei"), // rate mode
+      parseUnits("0", "wei"), // referral
+      address,
+    );
+
+    async function getUserData() {
+      const accountData = await LendingPool.getUserAccountData(address);
+      setUserData(formatUserData(accountData));
+    }
+    await getUserData();
+  }
+
+  // async function getUserData() {
+  //   const accountData = await LendingPool.getUserAccountData(address);
+  //   setUserData(formatUserData(accountData));
+  // }
+
+  const [approved, setApproved] = useState(false);
+
   return (
     <div className="App">
       <Header />
@@ -230,20 +261,22 @@ function App() {
           </Route>
           <Route exact path="/dash">
             <>
-              {userData && (
-                <div>
-                  <p>Health Factor: {userData.healthFactor}</p>
-                  <p>Total Debt: {userData.totalDebtETH}</p>
-                  <p>Total Collateral: {userData.totalCollateralETH}</p>
-                </div>
-              )}
+              <Card>
+                {userData && (
+                  <div>
+                    <p>Loan Health Factor: {userData.healthFactor}</p>
+                    <p>Total Debt (Eth): {userData.totalDebtETH}</p>
+                    <p>Total Collateral (Eth): {userData.totalCollateralETH}</p>
+                  </div>
+                )}
+              </Card>
               <div style={{ margin: "auto", width: "70vw" }}>
                 <Card
                   title="Begin The Watchful Eye's ritual."
                   size="large"
                   style={{ marginTop: 25, width: "100%", flex: true, alignItems: "center" }}
                 >
-                  <Form form={approveForm} onFinish={approve}>
+                  <Form form={approveForm}>
                     <Form.Item label="Debt Asset" name="debtAsset">
                       <Select labelInValue style={{ marginLeft: 27, width: 120 }}>
                         {ReserveTokenOptions}
@@ -285,8 +318,13 @@ function App() {
                       <Input />
                     </Form.Item>
                     <Form.Item>
-                      <Button type="primary" htmlType="submit">
-                        Ask for The Eye's Blessing
+                      <Button disabled={approved !== false} onClick={addWatchfulEye} type="primary" htmlType="submit">
+                        Configure the Eye with your information
+                      </Button>
+                    </Form.Item>
+                    <Form.Item>
+                      <Button disabled={approved !== true} onClick={approve} type="primary" htmlType="submit">
+                        Approve of the Eye's Intervention
                       </Button>
                     </Form.Item>
                   </Form>
@@ -308,6 +346,9 @@ function App() {
             </>
           </Route>
           <Route path="/adminDash">
+            <Card>
+              <Button onClick={doBorrow}>Do Loan Setup</Button>
+            </Card>
             <Contract
               name="FakeDebtToCollateralSwapper"
               signer={userProvider.getSigner()}

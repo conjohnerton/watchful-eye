@@ -70,15 +70,9 @@ contract TheWatchfulEye is FlashLoanReceiverBase, Ownable {
 
     constructor(
         LendingPoolAddressesProvider _provider,
-        address oneInch,
-        address fakeEthToDaiSwapper,
-        address fakeDebtToCollateralSwapper
+        address oneInch
     ) public FlashLoanReceiverBase(_provider) {
         _oneInch = IOneSplit(oneInch);
-        _linkToDai = IFakeLinkToDaiSwapper(fakeEthToDaiSwapper);
-        _debtToCollateral = IFakeDebtToCollateralSwapper(
-            fakeDebtToCollateralSwapper
-        );
     }
 
     function getWatchfulEye() public view returns (WatchfulEye memory) {
@@ -111,15 +105,8 @@ contract TheWatchfulEye is FlashLoanReceiverBase, Ownable {
                     (address, uint256, address, address, address)
                 );
 
-            IERC20(debtAsset).approve(address(_debtToCollateral), amounts[0]);
-            _debtToCollateral.repay(
-                ownerOfDebt,
-                debtAsset,
-                amounts[0],
-                collateralAsset
-            );
-            // IERC20(debtAsset).approve(address(LENDING_POOL), amounts[0]);
-            // LENDING_POOL.repay(debtAsset, amounts[0], 1, ownerOfDebt);
+            IERC20(debtAsset).approve(address(LENDING_POOL), amounts[0]);
+            LENDING_POOL.repay(debtAsset, amounts[0], 1, ownerOfDebt);
         }
 
         // Swap aToken to reserve token on Aave
