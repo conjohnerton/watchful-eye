@@ -1,0 +1,12 @@
+{
+  "name": "server",
+  "version": "1.0.0",
+  "description": "",
+  "main": "checker.js",
+  "scripts": {
+    "start": "node ./checker.js"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC"
+}

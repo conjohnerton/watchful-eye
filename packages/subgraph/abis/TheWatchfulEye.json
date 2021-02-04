@@ -451,7 +451,13 @@
     "type": "function"
   },
   {
-    "inputs": [],
+    "inputs": [
+      {
+        "internalType": "address",
+        "name": "owner",
+        "type": "address"
+      }
+    ],
     "name": "removeWatchfulEye",
     "outputs": [],
     "stateMutability": "nonpayable",

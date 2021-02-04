@@ -113,8 +113,8 @@ function App() {
       writeContracts["TheWatchfulEye"].addWatchfulEye(
         parseUnits(linkPrice, "wei"),
         parseUnits(daiPrice, "wei"),
-        parseUnits(linkAmount, "wei"),
-        parseUnits(daiAmount, "wei"),
+        parseUnits(linkAmount),
+        parseUnits(daiAmount),
         debtAsset.value,
         collateralAsset.value,
         aaveReserveData.find(pair => pair[0] === collateralAsset.label.slice(1)).tokenAddress,
@@ -130,7 +130,8 @@ function App() {
 
     console.log("Doing all approvals and setting up the contracts...");
     const link_rw = new ethersContract(collateralAsset.value, ERC20_ABI, userProvider.getSigner());
-    await tx(link_rw.approve(readContracts["TheWatchfulEye"].address, parseUnits(linkAmount, "wei")));
+    await tx(link_rw.approve(readContracts["TheWatchfulEye"].address, parseUnits(linkAmount)));
+    setApproved(false);
   }
 
   async function doLoan() {
@@ -188,23 +189,26 @@ function App() {
     const LINK = "0x514910771AF9Ca656af840dff83E8264EcF986CA";
     const DAI_ADDRESS = "0x6B175474E89094C44Da98b954EedeAC495271d0F";
     const token = new ethersContract(LINK, ERC20_ABI, userProvider.getSigner());
-    await token.approve(LENDING_POOL_ADDRESS, parseUnits("10000000000000000000", "wei"));
+    await token.approve(LENDING_POOL_ADDRESS, parseUnits("10"));
 
     const aave = new ethersContract(LENDING_POOL_ADDRESS, LENDING_POOL_ABI, userProvider.getSigner());
-    await aave.deposit(LINK, parseUnits("1"), address, parseUnits("0"));
+    await aave.deposit(LINK, parseUnits("10"), address, parseUnits("0"));
     await aave.borrow(
       DAI_ADDRESS,
-      parseUnits("1000000000000000", "wei"), // amount
+      parseUnits("10"), // amount
       parseUnits("1", "wei"), // rate mode
       parseUnits("0", "wei"), // referral
       address,
     );
 
     async function getUserData() {
-      const accountData = await LendingPool.getUserAccountData(address);
+      const accountData = await LendingPool?.getUserAccountData(address);
       setUserData(formatUserData(accountData));
     }
-    await getUserData();
+    
+    if (LendingPool) {
+      await getUserData();
+    }
   }
 
   // async function getUserData() {
@@ -349,13 +353,6 @@ function App() {
             <Card>
               <Button onClick={doBorrow}>Do Loan Setup</Button>
             </Card>
-            <Contract
-              name="FakeDebtToCollateralSwapper"
-              signer={userProvider.getSigner()}
-              provider={userProvider}
-              address={address}
-              blockExplorer={blockExplorer}
-            />
             <Contract
               name="TheWatchfulEye"
               signer={userProvider.getSigner()}

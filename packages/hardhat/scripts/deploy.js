@@ -14,6 +14,8 @@ const {
 const { parseUnits, formatUnits } = require("ethers/lib/utils");
 
 const LENDING_POOL_ADDRESS = "0xB53C1a33016B2DC2fF3653530bfF1848a515c8c5"; // mainnet
+const LINK = "0x514910771AF9Ca656af840dff83E8264EcF986CA";
+const DAI_ADDRESS = "0x6B175474E89094C44Da98b954EedeAC495271d0F";
 
 const main = async () => {
   console.log("\n\n 📡 Deploying...\n");
@@ -95,34 +97,49 @@ const main = async () => {
   );
 };
 
+const address = "0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266";
+
 const getAaveLoanOnAccount = async () => {
-  const DAI_ADDRESS = "0x6B175474E89094C44Da98b954EedeAC495271d0F";
+  await network.provider.request(
+    {
+      method: "hardhat_impersonateAccount",
+      params: [address],
+    } // Test account
+  );
+
+  const signer = await ethers.provider.getSigner(address)
+  console.log(signer.address)
+
   const aave = new Contract(
     LENDING_POOL_ADDRESS,
     lendingPoolABI,
-    ethers.provider.getSigner("0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266")
+    signer
   );
-  const dai = new Contract(
-    DAI_ADDRESS,
+  const collateral = new Contract(
+    LINK,
     erc20abi,
-    ethers.provider.getSigner("0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266")
+    signer
   );
 
-  const balance = await dai.balanceOf(
-    "0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266"
+  const balance = await collateral.balanceOf(
+    address
   );
   console.log(balance._hex);
   console.log(formatUnits(balance._hex, "wei"));
-  await dai.approve(
+  await collateral.approve(
     LENDING_POOL_ADDRESS,
-    parseUnits("100000000000000000", "wei")
+    parseUnits("1", "ether")
   );
 
+  const a = await collateral.allowance(address, LENDING_POOL_ADDRESS)
+  console.log('the allow', formatUnits(a._hex));
+
+
   await aave.deposit(
-    DAI_ADDRESS,
-    parseUnits("10000000000000000", "wei"),
-    "0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266",
-    parseUnits("0")
+    LINK,
+    parseUnits("1"),
+    address,
+    0
   );
 
   console.log(chalk.greenBright("Deposited to Aave!"));
@@ -132,14 +149,19 @@ const getAaveLoanOnAccount = async () => {
     parseUnits("100", "wei"),
     parseUnits("1", "wei"),
     parseUnits("0", "wei"),
-    "0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266"
+    address
   );
 
   console.log(res);
+
+  await network.provider.request({
+    method: "hardhat_stopImpersonatingAccount",
+    params: [address],
+  });
 };
 
 const giveDAIToMyAccount = async () => {
-  const LINK = "0x514910771AF9Ca656af840dff83E8264EcF986CA";
+  
   await network.provider.request(
     {
       method: "hardhat_impersonateAccount",
@@ -148,7 +170,7 @@ const giveDAIToMyAccount = async () => {
   );
 
   // Fund the contracts for the mock operations.
-  const Whalesigner = ethers.provider.getSigner(
+  const Whalesigner = await ethers.provider.getSigner(
     "0x708396f17127c42383E3b9014072679b2F60B82f"
   );
 
@@ -157,10 +179,12 @@ const giveDAIToMyAccount = async () => {
     erc20abi,
     Whalesigner
   );
-  await token.transfer(
-    "0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266",
+  const res = await token.transfer(
+    address,
     parseUnits("10")
-  ); 
+  );
+
+  console.log(`Token balance of ${address} = ${await token.balanceOf(address)}`)
 
   await network.provider.request({
     method: "hardhat_stopImpersonatingAccount",

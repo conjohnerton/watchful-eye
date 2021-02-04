@@ -58,7 +58,7 @@ const localProvider = new ethers.providers.JsonRpcProvider(
   "http://localhost:8545"
 );
 
-const contractArtifact = "0x5FbDB2315678afecb367f032d93F642f64180aa3";
+const contractArtifact = require("../react-app/src/contracts/TheWatchfulEye.address");
 
 const abi = require("../hardhat/artifacts/contracts/TheWatchfulEye.sol/TheWatchfulEye.json")
   .abi;
@@ -73,6 +73,7 @@ let contract = new ethers.Contract(
 
 setInterval(() => {
   const oneTrueEye = async () => {
+    console.log("Getting the Watchful Eye...")
     const currentEye = await contract.getWatchfulEye();
     currentCollateralPriceLimit = utils.formatUnits(currentEye[1]._hex, "wei");
     currentDebtPriceLimit = utils.formatUnits(currentEye[2]._hex, "wei");
@@ -82,8 +83,10 @@ setInterval(() => {
     currentcollateralAsset = currentEye[6];
     currentReserveAsset = currentEye[7];
 
-    console.log("collateral", currentCollateralPriceLimit);
-    console.log("debt", currentDebtPriceLimit);
+    if (utils.formatUnits(currentReserveAsset, "wei") == 0 && utils.formatUnits(currentdebtAsset, "wei") == 0) {
+      console.log('No Watchful Eye found.');
+      return;
+    }
 
     const getPrice = async () => {
       const debt = debtAssets.find((val) => {
@@ -108,22 +111,36 @@ setInterval(() => {
       const requestDebtToken = await axios.get(currentDebtToken);
       const requestCollateral = await axios.get(currentCollateralToken);
 
-      console.log(requestDebtToken.data["USD"], requestCollateral.data["USD"]);
       return {
         debtTokenPrice: requestDebtToken.data["USD"],
         colalteralTokenPrice: requestCollateral.data["USD"],
       };
     };
+
     const { debtTokenPrice, colalteralTokenPrice } = await getPrice();
 
     if (
       debtTokenPrice > currentDebtPriceLimit ||
       colalteralTokenPrice < currentCollateralPriceLimit
     ) {
-      console.log("awaiting for transaction");
+      console.log("Liquidating position...");
 
-      const flashLoan = await contract.makeFlashLoan();
+      try {
+        await contract.makeFlashLoan();
+        console.log("Succesfully liquidated the position watched by The Watchful Eye. Moving on...")
+      } catch (err) {
+        console.error("Could not complete liquidation...")
+        console.error("Error: ", err)
+      }
+    } else {
+      console.log("Position safe.")
+      console.log("Debt Price/Limit", debtTokenPrice, currentDebtPriceLimit)
+      console.log("Collateral Price/Limit", colalteralTokenPrice, currentCollateralPriceLimit)
     }
   };
   oneTrueEye();
 }, 14000);
+
+10000000000000000000
+10000000000000000000
+10000000005179950860
